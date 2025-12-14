@@ -1,6 +1,6 @@
-﻿/* ===============================
+﻿/* =====================================================
    ROOT THEME
-================================ */
+===================================================== */
 :root {
     --primary: #0d6efd;
     --secondary: #1fa97c;
@@ -13,24 +13,25 @@
     --radius: 14px;
 }
 
-/* ===============================
+/* =====================================================
    GLOBAL
-================================ */
+===================================================== */
 html {
     font-size: 15px;
 }
 
 body {
     margin: 0;
-    background: linear-gradient(180deg, #f4f7fb 0%, #eef2f7 100%) !important;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
     font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
     color: #212529;
-    padding-top: 90px; /* navbar ثابت */
+    padding-top: 90px; /* Navbar ثابت */
 }
 
-/* ===============================
+/* =====================================================
    NAVBAR
-================================ */
+===================================================== */
 .creative-navbar {
     position: fixed;
     top: 0;
@@ -47,6 +48,7 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    text-decoration: none;
 }
 
 .logo-circle {
@@ -82,6 +84,7 @@ body {
     border-radius: 20px;
     font-weight: 500;
     transition: .25s;
+    text-decoration: none;
 }
 
     .creative-navbar .nav-link:hover {
@@ -113,9 +116,9 @@ body {
         color: #fff;
     }
 
-/* ===============================
-   PAGE HEADER (العناوين)
-================================ */
+/* =====================================================
+   PAGE HEADER
+===================================================== */
 .page-header {
     background: var(--card);
     border-radius: var(--radius);
@@ -127,9 +130,9 @@ body {
     align-items: center;
 }
 
-/* ===============================
+/* =====================================================
    CARDS
-================================ */
+===================================================== */
 .card {
     background: var(--card);
     border-radius: var(--radius);
@@ -137,9 +140,9 @@ body {
     box-shadow: 0 6px 20px rgba(0,0,0,.08);
 }
 
-/* ===============================
+/* =====================================================
    TABLES
-================================ */
+===================================================== */
 .table {
     margin-bottom: 0;
 }
@@ -158,18 +161,23 @@ body {
     vertical-align: middle;
 }
 
-/* ===============================
+/* =====================================================
    BADGES
-================================ */
+===================================================== */
 .badge {
     padding: 6px 14px;
     font-size: .8rem;
     border-radius: 20px;
 }
 
-/* ===============================
-   BUTTONS
-================================ */
+/* =====================================================
+   BUTTONS (Bootstrap override)
+===================================================== */
+.btn {
+    font-weight: 600;
+    border-radius: 10px;
+}
+
 .btn-success {
     background: linear-gradient(135deg, var(--secondary), #2ecc71);
     border: none;
@@ -191,9 +199,9 @@ body {
     border: none;
 }
 
-/* ===============================
+/* =====================================================
    FORMS
-================================ */
+===================================================== */
 .form-control,
 .form-select {
     border-radius: 10px;
@@ -205,9 +213,75 @@ body {
         border-color: var(--primary);
     }
 
-/* ===============================
+/* =====================================================
    UTILITIES
-================================ */
+===================================================== */
 .text-muted {
-    color: #6c757d !important;
+    color: #1e11dc !important;
+}
+
+/* =====================================================
+   ACTION BUTTONS (TABLE)
+===================================================== */
+.table-actions {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* زر عام */
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .2s ease;
+    text-decoration: none !important; /* 🔥 مهم */
+    box-shadow: 0 2px 6px rgba(0,0,0,.15);
+}
+
+    /* منع underline في كل الحالات */
+    .btn-action,
+    .btn-action:hover,
+    .btn-action:focus,
+    .btn-action:active,
+    .table a {
+        text-decoration: none !important;
+    }
+
+/* كشف حساب */
+.btn-view {
+    background: linear-gradient(135deg, #0dcaf0, #0d6efd);
+    color: #fff;
+}
+
+    .btn-view:hover {
+        opacity: .9;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    }
+
+/* تعديل */
+.btn-edit {
+    background: linear-gradient(135deg, #ffc107, #ff9800);
+    color: #212529;
+}
+
+    .btn-edit:hover {
+        opacity: .9;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0,0,0,.25);
+    }
+
+/* تعطيل */
+.btn-disabled {
+    opacity: .5;
+    pointer-events: none;
 }

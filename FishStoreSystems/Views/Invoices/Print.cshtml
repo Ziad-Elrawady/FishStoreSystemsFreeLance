@@ -2,40 +2,66 @@
 @using System.Globalization
 
 @{
+    ViewData["Title"] = "طباعة فاتورة";
     var egyptCulture = new CultureInfo("ar-EG");
 }
 
-<h2>فاتورة للزبون: @Model.CustomerName</h2>
-<p>تاريخ الفاتورة: @Model.InvoiceDate.ToShortDateString()</p>
-<p>تاريخ الاستحقاق: @Model.DueDate.ToShortDateString()</p>
+<div class="container mt-4">
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>الصنف</th>
-            <th>الكمية</th>
-            <th>سعر الكيلو</th>
-            <th>الإجمالي</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Items)
-        {
+    <div class="text-center mb-4">
+        <h3 class="fw-bold">🧾 فاتورة بيع</h3>
+        <hr />
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <p><strong>الزبون:</strong> @Model.CustomerName</p>
+            <p><strong>رقم الفاتورة:</strong> @Model.Id</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+            <p><strong>تاريخ الفاتورة:</strong> @Model.InvoiceDate.ToShortDateString()</p>
+            <p><strong>تاريخ الاستحقاق:</strong> @Model.DueDate.ToShortDateString()</p>
+        </div>
+    </div>
+
+    <table class="table table-bordered text-center">
+        <thead class="table-dark">
             <tr>
-                <td>@item.ItemName</td>
-                <td>@item.Quantity</td>
-                <td>@item.UnitPrice.ToString("C", egyptCulture)</td>
-                <td>@item.TotalPrice.ToString("C", egyptCulture)</td>
+                <th>الصنف</th>
+                <th>الكمية</th>
+                <th>سعر الوحدة</th>
+                <th>الإجمالي</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.ItemName</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.UnitPrice.ToString("C", egyptCulture)</td>
+                    <td>@item.TotalPrice.ToString("C", egyptCulture)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 
-<p><strong>إجمالي الفاتورة: </strong> @Model.TotalAmount.ToString("C", egyptCulture)</p>
-<p><strong>المدفوع: </strong> @Model.PaidAmount.ToString("C", egyptCulture)</p>
-<p><strong>المتبقي: </strong> @Model.RemainingAmount.ToString("C", egyptCulture)</p>
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <p><strong>إجمالي الفاتورة:</strong> @Model.TotalAmount.ToString("C", egyptCulture)</p>
+            <p><strong>المدفوع:</strong> @Model.PaidAmount.ToString("C", egyptCulture)</p>
+            <p class="fw-bold text-danger">
+                <strong>المتبقي:</strong> @Model.RemainingAmount.ToString("C", egyptCulture)
+            </p>
+        </div>
+    </div>
 
-<div class="text-center mt-4">
-    <button onclick="window.print()" class="btn btn-success">🖨 طباعة</button>
-    <a href="/Invoices" class="btn btn-secondary">رجوع</a>
+    <div class="text-center mt-4 d-print-none">
+        <button onclick="window.print()" class="btn btn-success">
+            🖨 طباعة
+        </button>
+        <a href="/Invoices" class="btn btn-secondary">
+            رجوع
+        </a>
+    </div>
 </div>

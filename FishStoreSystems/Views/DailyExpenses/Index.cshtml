@@ -4,9 +4,12 @@
     var egyptCulture = new CultureInfo("ar-EG");
 }
 
-<h2>قائمة الخوارج اليومية</h2>
-<a href="/DailyExpenses/Create" class="btn btn-primary mb-3">➕ إضافة خوارج</a>
-
+@* <h2>قائمة الخوارج اليومية</h2>
+<a href="/DailyExpenses/Create" class="btn btn-primary mb-3">➕ إضافة خوارج</a> *@
+<div class="d-flex justify-content-between mb-3">
+    <h3>قائمة الخوارج اليومية</h3>
+    <a class="btn btn-success px-4" asp-action="Create"> إضافة خوارج</a>
+</div>
 <table class="table table-bordered table-striped">
     <thead class="table-dark">
         <tr>
