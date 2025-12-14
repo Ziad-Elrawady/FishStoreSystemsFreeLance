@@ -1,54 +1,77 @@
 ﻿@model FishStoreSystem.ViewModels.CustomerDetailsViewModel
+@using System.Globalization
 @{
     ViewData["Title"] = "كشف حساب";
+    var egyptCulture = new CultureInfo("ar-EG");
 }
 
-<h2 class="text-center mb-4">📊 كشف حساب: @Model.Customer.Name</h2>
+<h2 class="mb-4">
+    <i class="bi bi-graph-up"></i> كشف حساب: @Model.Customer.Name
+</h2>
 
-<h4 class="mt-4">الفواتير المفتوحة</h4>
-@foreach(var inv in Model.OpenInvoices)
+@foreach (var inv in Model.OpenInvoices)
 {
-    <div class="card mb-3 shadow">
-        <div class="card-header bg-warning">
-            <strong>فاتورة #@inv.Id</strong> - تاريخ: @inv.InvoiceDate.ToShortDateString() - استحقاق: @inv.DueDate.ToShortDateString()
+    <div class="card mb-3">
+        <div class="card-header bg-warning fw-bold">
+            فاتورة #@inv.Id — @inv.InvoiceDate.ToShortDateString()
         </div>
+
         <div class="card-body">
-            <p><strong>المبلغ الإجمالي:</strong> @inv.TotalAmount.ToString("C")</p>
-            <p><strong>المتبقي:</strong> <span class="text-danger fw-bold">@inv.RemainingAmount.ToString("C")</span></p>
-            
-            <h6>الأصناف:</h6>
+            <p>الإجمالي: <strong>@inv.TotalAmount.ToString("C", egyptCulture)</strong></p>
+            <p>
+                المتبقي:
+                <span class="fw-bold text-danger">
+                    @inv.RemainingAmount.ToString("C", egyptCulture)
+                </span>
+            </p>
+
+            <h6>الأصناف</h6>
             <ul>
-                @foreach(var item in inv.Items)
+                @foreach (var item in inv.Items)
                 {
-                    <li>@item.ItemName - @item.Quantity كيلو × @item.UnitPrice = @item.TotalPrice.ToString("C")</li>
+                    <li>
+                        @item.ItemName — @item.Quantity × @item.UnitPrice =
+                        @item.TotalPrice.ToString("C", egyptCulture)
+                    </li>
                 }
             </ul>
 
             <hr />
-            <form asp-controller="Invoices" asp-action="AddPayment" method="post" class="row g-3">
+
+            <form asp-controller="Invoices" asp-action="AddPayment" method="post" class="row g-2">
                 <input type="hidden" name="invoiceId" value="@inv.Id" />
+
                 <div class="col-md-4">
-                    <input type="number" name="amount" class="form-control" placeholder="مبلغ الدفع" step="0.01" required />
+                    <input name="amount" type="number" step="0.01"
+                           class="form-control" placeholder="مبلغ الدفع" required />
                 </div>
+
                 <div class="col-md-4">
-                    <select name="method" class="form-control">
+                    <select name="method" class="form-select">
                         <option value="كاش">كاش</option>
                         <option value="فيزا">فيزا</option>
                         <option value="تحويل">تحويل بنكي</option>
                     </select>
                 </div>
+
                 <div class="col-md-4">
-                    <button type="submit" class="btn btn-success">➕ إضافة دفعة</button>
+                    <button type="submit" class="btn btn-success w-100">
+                        ➕ إضافة دفعة
+                    </button>
                 </div>
             </form>
 
             @if (inv.Payments.Any())
             {
-                <h6 class="mt-3">المدفوعات السابقة:</h6>
+                <h6 class="mt-3">المدفوعات السابقة</h6>
                 <ul>
-                    @foreach(var p in inv.Payments)
+                    @foreach (var p in inv.Payments)
                     {
-                        <li>@p.PaymentDate.ToShortDateString() - @p.Amount.ToString("C") (@p.PaymentMethod)</li>
+                        <li>
+                            @p.PaymentDate.ToShortDateString() —
+                            @p.Amount.ToString("C", egyptCulture)
+                            (@p.PaymentMethod)
+                        </li>
                     }
                 </ul>
             }
@@ -56,4 +79,6 @@
     </div>
 }
 
-<a href="/Customers" class="btn btn-primary">🔙 العودة للقائمة</a>
+<a href="/Customers" class="btn btn-primary mt-3">
+    🔙 العودة
+</a>
