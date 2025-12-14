@@ -25,7 +25,7 @@ namespace FishStoreSystem_BL.Services
                 Id = c.Id,
                 Name = c.Name,
                 Phone = c.Phone,
-                CreditLimit = c.CreditLimit,
+                DebtWarningLimit = c.DebtWarningLimit,
                 Status = c.Status,
                 TotalDebt = c.Invoices.Sum(i => i.TotalAmount - i.PaidAmount)
             });
@@ -70,7 +70,7 @@ namespace FishStoreSystem_BL.Services
                     Id = c.Id,
                     Name = c.Name,
                     Phone = c.Phone,
-                    CreditLimit = c.CreditLimit,
+                    DebtWarningLimit = c.DebtWarningLimit,
                     Status = "متأخر",
                     TotalDebt = c.Invoices.Sum(i => i.TotalAmount - i.PaidAmount)
                 })

@@ -9,10 +9,10 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h3 class="mb-0 fw-bold">👥 الزبائن</h3>
-        <small class="text-muted">إدارة حسابات الزبائن</small>
+        <h4 class="text-muted fw-bold">إدارة حسابات الزبائن</h4>
     </div>
 
-    <a href="/Customers/Create" class="btn btn-success px-4">
+    <a asp-action="Create" class="btn btn-success px-4">
         <i class="bi bi-plus-circle"></i> إضافة زبون
     </a>
 </div>
@@ -25,15 +25,16 @@
                     <th>الاسم</th>
                     <th>الهاتف</th>
                     <th>إجمالي الدين</th>
+                    <th>حد التنبيه</th>
                     <th>الحالة</th>
-                    <th style="width:160px">إجراءات</th>
+                    <th style="width:180px">إجراءات</th>
                 </tr>
             </thead>
             <tbody>
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="5" class="py-4 text-muted">
+                        <td colspan="6" class="py-4 text-muted">
                             لا يوجد زبائن مسجلين
                         </td>
                     </tr>
@@ -43,16 +44,31 @@
                     @foreach (var c in Model)
                     {
                         var totalDebt = c.TotalDebt;
+                        var warningLimit = c.DebtWarningLimit;
+                        var isWarning = totalDebt >= warningLimit && warningLimit > 0;
 
-                        <tr>
+                        <tr class="@(isWarning ? "table-warning" : "")">
                             <td class="fw-semibold">@c.Name</td>
 
-                            <td class="text-muted">@c.Phone</td>
+                            <td class="text-muted fw-bold">@c.Phone</td>
 
                             <td>
                                 <span class="fw-bold @(totalDebt > 0 ? "text-danger" : "text-success")">
                                     @totalDebt.ToString("C", egyptCulture)
                                 </span>
+                            </td>
+
+                            <td>
+                                <span class="fw-semibold text-muted">
+                                    @warningLimit.ToString("C", egyptCulture)
+                                </span>
+
+                                @if (isWarning)
+                                {
+                                    <span class="badge bg-warning text-dark ms-1">
+                                        ⚠️
+                                    </span>
+                                }
                             </td>
 
                             <td>
@@ -62,19 +78,23 @@
                             </td>
 
                             <td>
-                                <div class="d-flex justify-content-center gap-2">
-                                    @if (c.TotalDebt > 0)
+                                <div class="table-actions">
+
+                                    @if (totalDebt > 0)
                                     {
-                                        <a href="/Customers/Details/@c.Id"
-                                           class="btn btn-sm btn-info px-3">
+                                        <a asp-action="Details"
+                                           asp-route-id="@c.Id"
+                                           class="btn-action btn-view">
                                             كشف حساب
                                         </a>
                                     }
 
-                                    <a href="/Customers/Edit/@c.Id"
-                                       class="btn btn-sm btn-warning px-3">
+                                    <a asp-action="Edit"
+                                       asp-route-id="@c.Id"
+                                       class="btn-action btn-edit">
                                         تعديل
                                     </a>
+
                                 </div>
                             </td>
 

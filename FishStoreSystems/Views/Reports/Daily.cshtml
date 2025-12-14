@@ -5,27 +5,32 @@
     var egyptCulture = new CultureInfo("ar-EG");
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2>
-        <i class="bi bi-bar-chart"></i> التقرير اليومي
-    </h2>
+<!-- ===== PAGE HEADER ===== -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">
+        <i class="bi bi-bar-chart"></i>
+        التقرير اليومي
+    </h3>
 
     <a asp-controller="Reports"
        asp-action="DailyPrint"
        asp-route-date="@Model.Date.ToString("yyyy-MM-dd")"
        target="_blank"
-       class="btn btn-warning btn-sm">
+       class="btn btn-warning">
         🖨️ طباعة التقرير
     </a>
 </div>
 
-<!-- Summary Cards -->
+<!-- ===== SUMMARY CARDS ===== -->
 <div class="row g-3 mb-4">
+
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <small class="text-muted">إجمالي اليوم</small>
-                <h5>@Model.TotalManualSales.ToString("C", egyptCulture)</h5>
+                <small class="text-muted fw-bold">إجمالي اليوم</small>
+                <h5 class="fw-bold">
+                    @Model.TotalManualSales.ToString("C", egyptCulture)
+                </h5>
             </div>
         </div>
     </div>
@@ -33,8 +38,8 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <small class="text-muted">المدفوعات</small>
-                <h5 class="text-success">
+                <small class="text-muted fw-bold">المدفوعات</small>
+                <h5 class="fw-bold text-success">
                     @Model.PaymentsReceived.ToString("C", egyptCulture)
                 </h5>
             </div>
@@ -44,8 +49,8 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <small class="text-muted">الخوارج</small>
-                <h5 class="text-danger">
+                <small class="text-muted fw-bold">الخوارج</small>
+                <h5 class="fw-bold text-danger">
                     @Model.Expenses.ToString("C", egyptCulture)
                 </h5>
             </div>
@@ -55,88 +60,123 @@
     <div class="col-md-3">
         <div class="card text-center">
             <div class="card-body">
-                <small class="text-muted">مبالغ على الزبائن</small>
-                <h5>
+                <small class="text-muted fw-bold">مبالغ على الزبائن</small>
+                <h5 class="fw-bold">
                     @Model.Receivables.ToString("C", egyptCulture)
                 </h5>
             </div>
         </div>
     </div>
+
 </div>
 
-<!-- Total Cash -->
+<!-- ===== TOTAL CASH ===== -->
 <div class="card mb-4">
-    <div class="card-body text-center fw-bold">
+    <div class="card-body text-center fw-bold fs-5">
         صافي اليوم بعد الخوارج:
-        @Model.TotalCash.ToString("C", egyptCulture)
+        <span class="text-primary">
+            @Model.TotalCash.ToString("C", egyptCulture)
+        </span>
     </div>
 </div>
 
-<!-- Overdue Customers -->
-<h4 class="mb-2">
-    الزبائن المتأخرين
+<!-- ===== OVERDUE CUSTOMERS ===== -->
+<div class="d-flex align-items-center gap-2 mb-2">
+    <h4 class="mb-0">الزبائن المتأخرين</h4>
     <span class="badge bg-danger">@Model.OverdueCustomers.Count</span>
-</h4>
+</div>
 
-<table class="table table-bordered table-striped text-center align-middle">
-    <thead class="table-dark">
-        <tr>
-            <th>الاسم</th>
-            <th>الهاتف</th>
-            <th>المبلغ</th>
-            <th>إجراء</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var c in Model.OverdueCustomers)
-        {
-            <tr>
-                <td>@c.Name</td>
-                <td>@c.Phone</td>
-                <td>@c.TotalDebt.ToString("C", egyptCulture)</td>
-                <td>
-                    <a asp-controller="Invoices"
-                       asp-action="PrintInvoice"
-                       asp-route-customerId="@c.Id"
-                       target="_blank"
-                       class="btn btn-sm btn-primary">
-                        🖨️ فاتورة
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="card mb-4">
+    <div class="card-body p-0">
+        <table class="table table-hover text-center align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>الاسم</th>
+                    <th>الهاتف</th>
+                    <th>المبلغ</th>
+                    <th>إجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.OverdueCustomers.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="py-3 text-muted fw-bold">
+                            لا يوجد زبائن متأخرين
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var c in Model.OverdueCustomers)
+                    {
+                        <tr>
+                            <td class="fw-semibold">@c.Name</td>
+                            <td>@c.Phone</td>
+                            <td class="text-danger fw-bold">
+                                @c.TotalDebt.ToString("C", egyptCulture)
+                            </td>
+                            <td>
+                                <a asp-controller="Invoices"
+                                   asp-action="PrintInvoice"
+                                   asp-route-customerId="@c.Id"
+                                   target="_blank"
+                                   class="btn-action btn-view">
+                                    🖨️ فاتورة
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
 
-<!-- Invoices Of Day -->
-<h4 class="mt-4 mb-2">فواتير اليوم</h4>
+<!-- ===== INVOICES OF DAY ===== -->
+<h4 class="mb-2">فواتير اليوم</h4>
 
-<table class="table table-bordered table-hover text-center align-middle">
-    <thead class="table-secondary">
-        <tr>
-            <th>#</th>
-            <th>العميل</th>
-            <th>التاريخ</th>
-            <th>الإجمالي</th>
-            <th>المدفوع</th>
-            <th>الباقي</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var inv in Model.InvoicesOfDay)
-        {
-            <tr>
-                <td>@inv.Id</td>
-                <td>@inv.CustomerName</td>
-                <td>@inv.InvoiceDate.ToString("yyyy-MM-dd")</td>
-                <td>@inv.TotalAmount.ToString("C", egyptCulture)</td>
-                <td>@inv.PaidAmount.ToString("C", egyptCulture)</td>
-                <td>
-                    <span class="badge @(inv.RemainingAmount > 0 ? "bg-danger" : "bg-success")">
-                        @inv.RemainingAmount.ToString("C", egyptCulture)
-                    </span>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover text-center align-middle mb-0">
+            <thead class="table-secondary">
+                <tr>
+                    <th>#</th>
+                    <th>العميل</th>
+                    <th>التاريخ</th>
+                    <th>الإجمالي</th>
+                    <th>المدفوع</th>
+                    <th>الباقي</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!Model.InvoicesOfDay.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="py-3 text-muted">
+                            لا توجد فواتير اليوم
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var inv in Model.InvoicesOfDay)
+                    {
+                        <tr>
+                            <td>@inv.Id</td>
+                            <td class="fw-semibold">@inv.CustomerName</td>
+                            <td>@inv.InvoiceDate.ToString("yyyy-MM-dd")</td>
+                            <td>@inv.TotalAmount.ToString("C", egyptCulture)</td>
+                            <td>@inv.PaidAmount.ToString("C", egyptCulture)</td>
+                            <td>
+                                <span class="badge @(inv.RemainingAmount > 0 ? "bg-danger" : "bg-success")">
+                                    @inv.RemainingAmount.ToString("C", egyptCulture)
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

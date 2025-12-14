@@ -43,7 +43,7 @@ namespace FishStoreSystem_DAL
             // إعداد خاصية حد الائتمان للعميل (CreditLimit)
             modelBuilder.Entity<Customer>(entity =>
             {
-                entity.Property(e => e.CreditLimit)
+                entity.Property(e => e.DebtWarningLimit)
                       .HasPrecision(18, 2); // إجمالي 18 رقم، منها رقمان بعد الفاصلة العشرية
             });
 

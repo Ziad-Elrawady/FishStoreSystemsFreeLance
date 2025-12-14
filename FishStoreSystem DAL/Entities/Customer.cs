@@ -14,8 +14,8 @@ namespace FishStoreSystem.DAL.Entities
         [Display(Name = "رقم الهاتف")]
         public string? Phone { get; set; }
 
-        [Display(Name = "حد الائتمان")]
-        public decimal? CreditLimit { get; set; }
+        [Display(Name = "حد التنبيه")]
+        public decimal DebtWarningLimit { get; set; } = 1000;
 
         [Display(Name = "الحالة")]
         public string Status { get; set; } = "جديد";

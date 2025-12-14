@@ -3,75 +3,137 @@
     ViewData["Title"] = "فاتورة جديدة";
 }
 
-<h2 class="text-center mb-4">🧾 فاتورة جديدة</h2>
+<!-- ===== PAGE HEADER ===== -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold mb-0">🧾 فاتورة جديدة</h3>
+    <a href="/Invoices" class="btn btn-secondary">🔙 رجوع</a>
+</div>
 
-<form asp-action="Create" method="post" class="p-4 border rounded bg-light">
+<div class="card">
+    <div class="card-body">
 
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <label asp-for="CustomerId" class="form-label fw-bold">الزبون</label>
-            <select asp-for="CustomerId" asp-items="Model.CustomersList" class="form-control" required></select>
-        </div>
+        <form asp-action="Create" method="post">
 
-        <div class="col-md-6">
-            <label asp-for="DueDate" class="form-label fw-bold">تاريخ الاستحقاق</label>
-            <input asp-for="DueDate" class="form-control" type="date" value="@Model.DueDate.ToString("yyyy-MM-dd")" required />
-        </div>
-    </div>
+            <!-- ===== CUSTOMER & DUE DATE ===== -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label asp-for="CustomerId" class="form-label fw-bold">الزبون</label>
+                    <select asp-for="CustomerId"
+                            asp-items="Model.CustomersList"
+                            class="form-select"
+                            required>
+                    </select>
+                </div>
 
-    <h5 class="mt-4">الأصناف:</h5>
-
-    <div id="itemsContainer">
-        <div class="item-row row mb-2">
-
-            <div class="col-md-5">
-                <input name="Items[0].ItemName" class="form-control" placeholder="اسم الصنف" required />
+                <div class="col-md-6">
+                    <label asp-for="DueDate" class="form-label fw-bold">تاريخ الاستحقاق</label>
+                    <input asp-for="DueDate"
+                           class="form-control"
+                           type="date"
+                           value="@Model.DueDate.ToString("yyyy-MM-dd")"
+                           required />
+                </div>
             </div>
 
-            <div class="col-md-2">
-                <input name="Items[0].Quantity" class="form-control quantity" placeholder="كمية"
-                       type="number" step="0.25" min="0" required oninput="updateTotal(this)" />
+            <hr />
+
+            <!-- ===== ITEMS ===== -->
+            <h5 class="fw-bold mb-3">الأصناف</h5>
+
+            <div id="itemsContainer">
+                <div class="item-row row g-2 mb-2 align-items-center">
+
+                    <div class="col-md-5">
+                        <input name="Items[0].ItemName"
+                               class="form-control"
+                               placeholder="اسم الصنف"
+                               required />
+                    </div>
+
+                    <div class="col-md-2">
+                        <input name="Items[0].Quantity"
+                               class="form-control quantity"
+                               placeholder="كمية"
+                               type="number"
+                               step="0.25"
+                               min="0"
+                               required
+                               oninput="updateTotal(this)" />
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            <input name="Items[0].UnitPrice"
+                                   class="form-control unitPrice"
+                                   placeholder="السعر"
+                                   type="number"
+                                   step="0.25"
+                                   min="0"
+                                   required
+                                   oninput="updateTotal(this)" />
+                            <span class="input-group-text">EGP</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="input-group">
+                            <input name="Items[0].TotalPrice"
+                                   class="form-control totalPrice"
+                                   placeholder="الإجمالي"
+                                   type="number"
+                                   step="0.01"
+                                   readonly />
+                            <span class="input-group-text">EGP</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-1 text-center">
+                        <button type="button"
+                                class="btn btn-danger"
+                                onclick="removeItem(this)">
+                            ❌
+                        </button>
+                    </div>
+                </div>
             </div>
 
-            <div class="col-md-2">
+            <button type="button"
+                    class="btn btn-info mb-3"
+                    onclick="addItem()">
+                ➕ إضافة صنف
+            </button>
+
+            <hr />
+
+            <!-- ===== TOTAL ===== -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">إجمالي الفاتورة</label>
                 <div class="input-group">
-                    <input name="Items[0].UnitPrice" class="form-control unitPrice" placeholder="السعر"
-                           type="number" step="0.25" min="0" required oninput="updateTotal(this)" />
+                    <input name="TotalAmount"
+                           id="InvoiceTotal"
+                           class="form-control fw-bold"
+                           type="number"
+                           step="0.01"
+                           readonly />
                     <span class="input-group-text">EGP</span>
                 </div>
             </div>
 
-            <div class="col-md-2">
-                <div class="input-group">
-                    <input name="Items[0].TotalPrice" class="form-control totalPrice" placeholder="الإجمالي"
-                           type="number" step="0.01" readonly />
-                    <span class="input-group-text">EGP</span>
-                </div>
+            <!-- ===== ACTIONS ===== -->
+            <div class="text-center">
+                <button type="submit" class="btn btn-success btn-lg px-5">
+                    💾 حفظ الفاتورة
+                </button>
+                <a href="/Invoices" class="btn btn-secondary px-4">
+                    إلغاء
+                </a>
             </div>
 
-            <div class="col-md-1">
-                <button type="button" class="btn btn-danger" onclick="removeItem(this)">❌</button>
-            </div>
-        </div>
+        </form>
     </div>
+</div>
 
-    <button type="button" class="btn btn-info mb-3" onclick="addItem()">➕ إضافة صنف</button>
-
-    <div class="mb-3">
-        <label class="form-label fw-bold">إجمالي الفاتورة</label>
-        <div class="input-group">
-            <input name="TotalAmount" id="InvoiceTotal" class="form-control fw-bold"
-                   type="number" step="0.01" readonly />
-            <span class="input-group-text">EGP</span>
-        </div>
-    </div>
-
-    <div class="mt-4 text-center">
-        <button type="submit" class="btn btn-success btn-lg">💾 حفظ الفاتورة</button>
-        <a href="/Invoices" class="btn btn-secondary">إلغاء</a>
-    </div>
-</form>
-
+<!-- ===== JS (زي ما هو بدون تغيير) ===== -->
 <script>
     let itemIndex = 1;
 
@@ -79,7 +141,7 @@
         const container = document.getElementById('itemsContainer');
         const row = document.createElement('div');
 
-        row.className = 'item-row row mb-2';
+        row.className = 'item-row row g-2 mb-2 align-items-center';
 
         row.innerHTML = `
             <div class="col-md-5">
@@ -87,30 +149,33 @@
             </div>
 
             <div class="col-md-2">
-                <input name="Items[${itemIndex}].Quantity" class="form-control quantity" placeholder="كمية"
-                       type="number" step="0.25" min="0" required oninput="updateTotal(this)" />
+                <input name="Items[${itemIndex}].Quantity" class="form-control quantity"
+                       placeholder="كمية" type="number" step="0.25" min="0"
+                       required oninput="updateTotal(this)" />
             </div>
 
             <div class="col-md-2">
                 <div class="input-group">
-                    <input name="Items[${itemIndex}].UnitPrice" class="form-control unitPrice" placeholder="السعر"
-                           type="number" step="0.25" min="0" required oninput="updateTotal(this)" />
+                    <input name="Items[${itemIndex}].UnitPrice" class="form-control unitPrice"
+                           placeholder="السعر" type="number" step="0.25" min="0"
+                           required oninput="updateTotal(this)" />
                     <span class="input-group-text">EGP</span>
                 </div>
             </div>
 
             <div class="col-md-2">
                 <div class="input-group">
-                    <input name="Items[${itemIndex}].TotalPrice" class="form-control totalPrice" placeholder="الإجمالي"
-                           type="number" step="0.01" readonly />
+                    <input name="Items[${itemIndex}].TotalPrice" class="form-control totalPrice"
+                           placeholder="الإجمالي" type="number" step="0.01" readonly />
                     <span class="input-group-text">EGP</span>
                 </div>
             </div>
 
-            <div class="col-md-1">
+            <div class="col-md-1 text-center">
                 <button type="button" class="btn btn-danger" onclick="removeItem(this)">❌</button>
             </div>
         `;
+
         container.appendChild(row);
         itemIndex++;
     }
