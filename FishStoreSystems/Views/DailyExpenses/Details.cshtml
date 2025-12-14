@@ -1,12 +1,125 @@
-﻿@model FishStoreSystem_DAL.Entities.DailyExpense
+﻿@model FishStoreSystem.ViewModels.CustomerDetailsViewModel
 @using System.Globalization
 @{
+    ViewData["Title"] = "كشف حساب";
     var egyptCulture = new CultureInfo("ar-EG");
 }
 
-<h2>تفاصيل الخروج</h2>
-<p><strong>التاريخ:</strong> @Model.Date.ToString("yyyy-MM-dd")</p>
-<p><strong>المبلغ:</strong> @Model.Amount.ToString("C", egyptCulture)</p>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>
+        <i class="bi bi-graph-up"></i>
+        كشف حساب: @Model.Customer.Name
+    </h2>
 
-<a href="/DailyExpenses/Index" class="btn btn-secondary">رجوع</a>
-<a href="/DailyExpenses/Edit/@Model.Id" class="btn btn-warning">تعديل</a>
+    <a href="/Customers" class="btn btn-primary">
+        🔙 العودة
+    </a>
+</div>
+
+@if (!Model.OpenInvoices.Any())
+{
+    <!-- EMPTY STATE -->
+    <div class="card text-center p-5">
+        <div class="card-body">
+            <i class="bi bi-check-circle text-success fs-1"></i>
+            <h4 class="mt-3">لا يوجد فواتير مفتوحة</h4>
+            <p class="text-muted">
+                هذا العميل لا يوجد عليه أي مبالغ مستحقة حالياً
+            </p>
+        </div>
+    </div>
+}
+else
+{
+    @foreach (var inv in Model.OpenInvoices)
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-warning fw-bold">
+                فاتورة #@inv.Id
+                <span class="text-muted">
+                    — @inv.InvoiceDate.ToShortDateString()
+                </span>
+            </div>
+
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        الإجمالي:
+                        <strong>@inv.TotalAmount.ToString("C", egyptCulture)</strong>
+                    </div>
+                    <div class="col-md-6">
+                        المتبقي:
+                        <strong class="text-danger">
+                            @inv.RemainingAmount.ToString("C", egyptCulture)
+                        </strong>
+                    </div>
+                </div>
+
+                <h6 class="mt-3">الأصناف</h6>
+                <ul class="list-group mb-3">
+                    @foreach (var item in inv.Items)
+                    {
+                        <li class="list-group-item d-flex justify-content-between">
+                            <span>
+                                @item.ItemName — @item.Quantity × @item.UnitPrice
+                            </span>
+                            <strong>
+                                @item.TotalPrice.ToString("C", egyptCulture)
+                            </strong>
+                        </li>
+                    }
+                </ul>
+
+                <form asp-controller="Invoices"
+                      asp-action="AddPayment"
+                      method="post"
+                      class="row g-2">
+                    <input type="hidden" name="invoiceId" value="@inv.Id" />
+
+                    <div class="col-md-4">
+                        <input name="amount"
+                               type="number"
+                               step="0.01"
+                               class="form-control"
+                               placeholder="مبلغ الدفع"
+                               required />
+                    </div>
+
+                    <div class="col-md-4">
+                        <select name="method" class="form-select">
+                            <option value="كاش">كاش</option>
+                            <option value="فيزا">فيزا</option>
+                            <option value="تحويل">تحويل بنكي</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <button type="submit"
+                                class="btn btn-success w-100">
+                            ➕ إضافة دفعة
+                        </button>
+                    </div>
+                </form>
+
+                @if (inv.Payments.Any())
+                {
+                    <h6 class="mt-4">المدفوعات السابقة</h6>
+                    <ul class="list-group">
+                        @foreach (var p in inv.Payments)
+                        {
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>
+                                    @p.PaymentDate.ToShortDateString()
+                                    (@p.PaymentMethod)
+                                </span>
+                                <strong>
+                                    @p.Amount.ToString("C", egyptCulture)
+                                </strong>
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    }
+}

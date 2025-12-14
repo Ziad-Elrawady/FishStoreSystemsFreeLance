@@ -169,30 +169,48 @@ namespace FishStoreSystem.Controllers
             var allInvoices = await _invoiceService.GetAllAsync();
             var overdueCustomers = await _customerService.GetOverdueCustomersAsync();
 
+            // فواتير اليوم
             var dailyInvoices = allInvoices
                 .Where(i => i.InvoiceDate.Date == targetDate.Date)
                 .ToList();
 
+            // المبالغ المتبقية على الزبائن
             var receivables = dailyInvoices
                 .Where(i => i.PaidAmount < i.TotalAmount)
-                .Sum(i => i.RemainingAmount);
+                .Sum(i => i.TotalAmount - i.PaidAmount);
 
-            var paymentsReceived = dailyInvoices
+            // المدفوعات المستلمة بتاريخ اليوم (زي Daily بالظبط)
+            var paymentsReceived = allInvoices
                 .SelectMany(i => i.Payments)
                 .Where(p => p.PaymentDate.Date == targetDate.Date)
                 .Sum(p => p.Amount);
 
+            // ✅ مبيعات صاحب المحل (المدخلة يدويًا)
+            var totalManualSales = await _context.DailySales
+                .Where(o => o.Date.Date == targetDate.Date)
+                .SumAsync(o => o.Amount);
+
+            // ✅ الخوارج اليومية
+            var totalExpenses = await _context.DailyExpenses
+                .Where(e => e.Date.Date == targetDate.Date)
+                .SumAsync(e => e.Amount);
+
             var model = new DailyReportViewModel
             {
                 Date = targetDate,
-                Receivables = receivables,
+                InvoicesOfDay = dailyInvoices,
                 PaymentsReceived = paymentsReceived,
+                Receivables = receivables,
                 OverdueCustomers = overdueCustomers.ToList(),
-                InvoicesOfDay = dailyInvoices
+
+                TotalManualSales = totalManualSales,
+                Expenses = totalExpenses
             };
 
-            return View("DailyPrint", model); // استدعاء View منفصل للطباعة
+            return View("DailyPrint", model);
         }
+
+
         public async Task<IActionResult> WeeklyPrint(DateTime? start)
         {
             var startDate = start ?? DateTime.Today;

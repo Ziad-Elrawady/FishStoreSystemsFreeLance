@@ -1,33 +1,95 @@
 ﻿@model FishStoreSystem.ViewModels.DailyReportViewModel
 @using System.Globalization
 @{
+    Layout = null;
     var egyptCulture = new CultureInfo("ar-EG");
 }
 
-<div class="container mt-4">
-    <h2 class="text-center mb-4">تقرير اليوم: @Model.Date.ToString("yyyy-MM-dd")</h2>
-    <a class="btn btn-warning btn-sm"
-       href="/Reports/DailyPrint?date=@Model.Date.ToString("yyyy-MM-dd")"
-       target="_blank">
-        طباعة التقرير اليومي
-    </a>    <table class="table table-bordered table-striped text-center">
-        <thead class="table-dark">
-            <tr>
-                <th>إجمالي المبيعات</th>
-                <th>المدفوعات المستلمة</th>
-                <th>الخوارج</th>
-                <th>المبالغ على الزبائن</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>@Model.TotalManualSales.ToString("C", egyptCulture)</td>
-                <td>@Model.PaymentsReceived.ToString("C", egyptCulture)</td>
-                <td>@Model.Expenses.ToString("C", egyptCulture)</td>
-                <td>@Model.Receivables.ToString("C", egyptCulture)</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8" />
+    <title>تقرير يومي</title>
 
->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 20px;
+            font-family: Arial;
+        }
+
+        @@page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        @@media print {
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- Header -->
+        <div class="text-center mb-3">
+            <h4 class="fw-bold">🐟 شهد القنال</h4>
+            <small>تقرير يومي</small>
+            <hr />
+        </div>
+
+        <p class="text-center">
+            تاريخ التقرير: <strong>@Model.Date.ToString("yyyy-MM-dd")</strong>
+        </p>
+
+        <table class="table table-bordered text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>إجمالي المبيعات</th>
+                    <th>المدفوعات المستلمة</th>
+                    <th>الخوارج</th>
+                    <th>المبالغ على الزبائن</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        @Model.TotalManualSales.ToString("C", egyptCulture)
+                    </td>
+                    <td>
+                        @Model.PaymentsReceived.ToString("C", egyptCulture)
+                    </td>
+                    <td>
+                        @Model.Expenses.ToString("C", egyptCulture)
+                    </td>
+                    <td>
+                        @Model.Receivables.ToString("C", egyptCulture)
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="text-center mt-3 fw-bold">
+            صافي اليوم بعد الخوارج:
+            @Model.TotalCash.ToString("C", egyptCulture)
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-4">
+            <small>تاريخ الطباعة: @DateTime.Now.ToString("yyyy-MM-dd HH:mm")</small>
+        </div>
+
+        <!-- Buttons -->
+        <div class="text-center mt-3 no-print">
+            <button class="btn btn-success" onclick="window.print()">🖨️ طباعة</button>
+            <a class="btn btn-secondary" href="/Reports/Daily">إغلاق</a>
+        </div>
+
+    </div>
+
+</body>
+</html>
