@@ -1,0 +1,42 @@
+﻿@model FishStoreSystem.ViewModels.WeeklyReportViewModel
+@using System.Globalization
+@{
+    var egyptCulture = new CultureInfo("ar-EG");
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">التقرير الأسبوعي من @Model.StartDate.ToString("yyyy-MM-dd") إلى @Model.EndDate.ToString("yyyy-MM-dd")</h2>
+
+    <table class="table table-bordered table-striped text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>التاريخ</th>
+                <th>إجمالي المبيعات</th>
+                <th>المدفوعات المستلمة</th>
+                <th>الخوارج</th>
+                <th>المبالغ على الزبائن</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.Date.ToString("yyyy-MM-dd")</td>
+                    <td>@item.Sales.ToString("C", egyptCulture)</td>
+                    <td>@item.PaymentsReceived.ToString("C", egyptCulture)</td>
+                    <td>@item.Expenses.ToString("C", egyptCulture)</td>
+                    <td>@item.Receivables.ToString("C", egyptCulture)</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot class="table-secondary">
+            <tr>
+                <th>المجموع</th>
+                <th>@Model.Items.Sum(i => i.Sales).ToString("C", egyptCulture)</th>
+                <th>@Model.Items.Sum(i => i.PaymentsReceived).ToString("C", egyptCulture)</th>
+                <th>@Model.Items.Sum(i => i.Expenses).ToString("C", egyptCulture)</th>
+                <th>@Model.Items.Sum(i => i.Receivables).ToString("C", egyptCulture)</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>

@@ -1,0 +1,40 @@
+﻿@model IEnumerable<FishStoreSystem.BL.DTO.CustomerDTO>
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "الزبائن";
+    var egyptCulture = new CultureInfo("ar-EG");
+}
+
+<h2 class="text-center mb-4">📋 قائمة الزبائن</h2>
+
+<table class="table table-hover table-striped text-center">
+    <thead class="table-dark">
+        <tr>
+            <th>الاسم</th>
+            <th>الهاتف</th>
+            <th>إجمالي الدين</th>
+            <th>الحالة</th>
+            <th>إجراءات</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            var totalDebt = c.TotalDebt;
+            var statusClass = totalDebt > 0 ? "text-danger" : "text-success";
+            <tr>
+                <td>@c.Name</td>
+                <td>@c.Phone</td>
+                <td class="@statusClass fw-bold">@totalDebt.ToString("C", egyptCulture)</td>
+                <td>@c.Status</td>
+                <td>
+                    <a href="/Customers/Details/@c.Id" class="btn btn-sm btn-info">كشف حساب</a>
+                    <a href="/Customers/Edit/@c.Id" class="btn btn-sm btn-warning">تعديل</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="/Customers/Create" class="btn btn-success btn-lg">➕ إضافة زبون جديد</a>

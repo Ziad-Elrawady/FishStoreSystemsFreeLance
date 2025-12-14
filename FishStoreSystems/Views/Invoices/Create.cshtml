@@ -1,0 +1,140 @@
+﻿@model FishStoreSystem.ViewModels.InvoiceCreateViewModel
+@{
+    ViewData["Title"] = "فاتورة جديدة";
+}
+
+<h2 class="text-center mb-4">🧾 فاتورة جديدة</h2>
+
+<form asp-action="Create" method="post" class="p-4 border rounded bg-light">
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label asp-for="CustomerId" class="form-label fw-bold">الزبون</label>
+            <select asp-for="CustomerId" asp-items="Model.CustomersList" class="form-control" required></select>
+        </div>
+
+        <div class="col-md-6">
+            <label asp-for="DueDate" class="form-label fw-bold">تاريخ الاستحقاق</label>
+            <input asp-for="DueDate" class="form-control" type="date" value="@Model.DueDate.ToString("yyyy-MM-dd")" required />
+        </div>
+    </div>
+
+    <h5 class="mt-4">الأصناف:</h5>
+
+    <div id="itemsContainer">
+        <div class="item-row row mb-2">
+
+            <div class="col-md-5">
+                <input name="Items[0].ItemName" class="form-control" placeholder="اسم الصنف" required />
+            </div>
+
+            <div class="col-md-2">
+                <input name="Items[0].Quantity" class="form-control quantity" placeholder="كمية"
+                       type="number" step="0.25" min="0" required oninput="updateTotal(this)" />
+            </div>
+
+            <div class="col-md-2">
+                <div class="input-group">
+                    <input name="Items[0].UnitPrice" class="form-control unitPrice" placeholder="السعر"
+                           type="number" step="0.25" min="0" required oninput="updateTotal(this)" />
+                    <span class="input-group-text">EGP</span>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="input-group">
+                    <input name="Items[0].TotalPrice" class="form-control totalPrice" placeholder="الإجمالي"
+                           type="number" step="0.01" readonly />
+                    <span class="input-group-text">EGP</span>
+                </div>
+            </div>
+
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger" onclick="removeItem(this)">❌</button>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="btn btn-info mb-3" onclick="addItem()">➕ إضافة صنف</button>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">إجمالي الفاتورة</label>
+        <div class="input-group">
+            <input name="TotalAmount" id="InvoiceTotal" class="form-control fw-bold"
+                   type="number" step="0.01" readonly />
+            <span class="input-group-text">EGP</span>
+        </div>
+    </div>
+
+    <div class="mt-4 text-center">
+        <button type="submit" class="btn btn-success btn-lg">💾 حفظ الفاتورة</button>
+        <a href="/Invoices" class="btn btn-secondary">إلغاء</a>
+    </div>
+</form>
+
+<script>
+    let itemIndex = 1;
+
+    function addItem() {
+        const container = document.getElementById('itemsContainer');
+        const row = document.createElement('div');
+
+        row.className = 'item-row row mb-2';
+
+        row.innerHTML = `
+            <div class="col-md-5">
+                <input name="Items[${itemIndex}].ItemName" class="form-control" placeholder="اسم الصنف" required />
+            </div>
+
+            <div class="col-md-2">
+                <input name="Items[${itemIndex}].Quantity" class="form-control quantity" placeholder="كمية"
+                       type="number" step="0.25" min="0" required oninput="updateTotal(this)" />
+            </div>
+
+            <div class="col-md-2">
+                <div class="input-group">
+                    <input name="Items[${itemIndex}].UnitPrice" class="form-control unitPrice" placeholder="السعر"
+                           type="number" step="0.25" min="0" required oninput="updateTotal(this)" />
+                    <span class="input-group-text">EGP</span>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <div class="input-group">
+                    <input name="Items[${itemIndex}].TotalPrice" class="form-control totalPrice" placeholder="الإجمالي"
+                           type="number" step="0.01" readonly />
+                    <span class="input-group-text">EGP</span>
+                </div>
+            </div>
+
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger" onclick="removeItem(this)">❌</button>
+            </div>
+        `;
+        container.appendChild(row);
+        itemIndex++;
+    }
+
+    function removeItem(btn) {
+        btn.closest('.item-row').remove();
+        updateInvoiceTotal();
+    }
+
+    function updateTotal(input) {
+        const row = input.closest('.item-row');
+        const qty = parseFloat(row.querySelector('.quantity').value) || 0;
+        const price = parseFloat(row.querySelector('.unitPrice').value) || 0;
+        row.querySelector('.totalPrice').value = (qty * price).toFixed(2);
+        updateInvoiceTotal();
+    }
+
+    function updateInvoiceTotal() {
+        let total = 0;
+        document.querySelectorAll('.totalPrice').forEach(tp => {
+            total += parseFloat(tp.value) || 0;
+        });
+        document.getElementById('InvoiceTotal').value = total.toFixed(2);
+    }
+
+    updateInvoiceTotal();
+</script>

@@ -1,0 +1,41 @@
+﻿@model FishStoreSystem.BL.DTO.InvoiceDTO
+@using System.Globalization
+
+@{
+    var egyptCulture = new CultureInfo("ar-EG");
+}
+
+<h2>فاتورة للزبون: @Model.CustomerName</h2>
+<p>تاريخ الفاتورة: @Model.InvoiceDate.ToShortDateString()</p>
+<p>تاريخ الاستحقاق: @Model.DueDate.ToShortDateString()</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>الصنف</th>
+            <th>الكمية</th>
+            <th>سعر الكيلو</th>
+            <th>الإجمالي</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.ItemName</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("C", egyptCulture)</td>
+                <td>@item.TotalPrice.ToString("C", egyptCulture)</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<p><strong>إجمالي الفاتورة: </strong> @Model.TotalAmount.ToString("C", egyptCulture)</p>
+<p><strong>المدفوع: </strong> @Model.PaidAmount.ToString("C", egyptCulture)</p>
+<p><strong>المتبقي: </strong> @Model.RemainingAmount.ToString("C", egyptCulture)</p>
+
+<div class="text-center mt-4">
+    <button onclick="window.print()" class="btn btn-success">🖨 طباعة</button>
+    <a href="/Invoices" class="btn btn-secondary">رجوع</a>
+</div>

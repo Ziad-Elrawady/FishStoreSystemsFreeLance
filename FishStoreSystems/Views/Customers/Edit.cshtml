@@ -1,0 +1,47 @@
+﻿@model FishStoreSystem.BL.DTO.CustomerDTO
+
+@{
+    ViewData["Title"] = "تعديل بيانات الزبون";
+}
+
+<h2 class="text-center mb-4">✏️ تعديل بيانات الزبون</h2>
+
+<form asp-action="Edit" method="post" class="p-4 border rounded bg-light">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label fw-bold"></label>
+        <input asp-for="Name" class="form-control" placeholder="اسم الزبون" required />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Phone" class="form-label fw-bold"></label>
+        <input asp-for="Phone" class="form-control" placeholder="رقم الهاتف" />
+        <span asp-validation-for="Phone" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CreditLimit" class="form-label fw-bold"></label>
+        <input asp-for="CreditLimit" class="form-control" type="number" step="0.01" placeholder="حد الائتمان" />
+        <span asp-validation-for="CreditLimit" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label fw-bold"></label>
+        <select asp-for="Status" class="form-control">
+            <option value="نشط" selected="@Model.Status == " نشط"">نشط</option>
+            <option value="غير نشط" selected="@Model.Status == " غير نشط"">غير نشط</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-success btn-lg">💾 حفظ التغييرات</button>
+        <a asp-action="Index" class="btn btn-secondary">إلغاء</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

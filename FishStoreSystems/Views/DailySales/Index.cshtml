@@ -1,0 +1,36 @@
+﻿@model IEnumerable<FishStoreSystem_DAL.Entities.DailySale>
+@using System.Globalization
+@{
+    var egypt = new CultureInfo("ar-EG");
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between mb-3">
+        <h3>مبيعات يومية</h3>
+        <a class="btn btn-primary" asp-action="Create">➕ إضافة مبيعة</a>
+    </div>
+
+    <table class="table table-striped table-bordered text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>التاريخ</th>
+                <th>المبلغ</th>
+                <th>إجراءات</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model)
+            {
+                <tr>
+                    <td>@s.Date.ToString("yyyy-MM-dd")</td>
+                    <td>@s.Amount.ToString("C", egypt)</td>
+                    <td>
+                        <a class="btn btn-sm btn-info" asp-action="Edit" asp-route-id="@s.Id">تعديل</a>
+                        <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@s.Id">حذف</a>
+                        <a class="btn btn-sm btn-secondary" asp-action="Details" asp-route-id="@s.Id">تفاصيل</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

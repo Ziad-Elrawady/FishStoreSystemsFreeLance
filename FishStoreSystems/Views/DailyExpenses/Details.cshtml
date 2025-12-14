@@ -1,0 +1,12 @@
+﻿@model FishStoreSystem_DAL.Entities.DailyExpense
+@using System.Globalization
+@{
+    var egyptCulture = new CultureInfo("ar-EG");
+}
+
+<h2>تفاصيل الخروج</h2>
+<p><strong>التاريخ:</strong> @Model.Date.ToString("yyyy-MM-dd")</p>
+<p><strong>المبلغ:</strong> @Model.Amount.ToString("C", egyptCulture)</p>
+
+<a href="/DailyExpenses/Index" class="btn btn-secondary">رجوع</a>
+<a href="/DailyExpenses/Edit/@Model.Id" class="btn btn-warning">تعديل</a>

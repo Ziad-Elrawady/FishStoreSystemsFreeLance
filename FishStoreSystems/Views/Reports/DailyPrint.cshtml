@@ -1,0 +1,33 @@
+﻿@model FishStoreSystem.ViewModels.DailyReportViewModel
+@using System.Globalization
+@{
+    var egyptCulture = new CultureInfo("ar-EG");
+}
+
+<div class="container mt-4">
+    <h2 class="text-center mb-4">تقرير اليوم: @Model.Date.ToString("yyyy-MM-dd")</h2>
+    <a class="btn btn-warning btn-sm"
+       href="/Reports/DailyPrint?date=@Model.Date.ToString("yyyy-MM-dd")"
+       target="_blank">
+        طباعة التقرير اليومي
+    </a>    <table class="table table-bordered table-striped text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>إجمالي المبيعات</th>
+                <th>المدفوعات المستلمة</th>
+                <th>الخوارج</th>
+                <th>المبالغ على الزبائن</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@Model.TotalManualSales.ToString("C", egyptCulture)</td>
+                <td>@Model.PaymentsReceived.ToString("C", egyptCulture)</td>
+                <td>@Model.Expenses.ToString("C", egyptCulture)</td>
+                <td>@Model.Receivables.ToString("C", egyptCulture)</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+>

@@ -1,0 +1,95 @@
+﻿@model FishStoreSystem.BL.DTO.InvoiceDTO
+
+@{
+    ViewData["Title"] = "تفاصيل الفاتورة";
+}
+
+<h2 class="text-center mb-4">🧾 تفاصيل الفاتورة</h2>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <h5>رقم الفاتورة: <strong>@Model.Id</strong></h5>
+        <p>الزبون: <strong>@Model.CustomerName</strong></p>
+        <p>تاريخ الفاتورة: <strong>@Model.InvoiceDate.ToString("yyyy-MM-dd")</strong></p>
+        <p>تاريخ الاستحقاق: <strong>@Model.DueDate.ToString("yyyy-MM-dd")</strong></p>
+        <p>الحالة: <strong>@Model.Status</strong></p>
+        <p>إجمالي الفاتورة: <strong>@Model.TotalAmount.ToString("C")</strong></p>
+        <p>المدفوع: <strong>@Model.PaidAmount.ToString("C")</strong></p>
+        <p>المتبقي: <strong>@Model.RemainingAmount.ToString("C")</strong></p>
+    </div>
+</div>
+
+<h4>الأصناف</h4>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>اسم الصنف</th>
+            <th>الكمية</th>
+            <th>السعر للوحدة</th>
+            <th>الإجمالي</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.ItemName</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("C")</td>
+                <td>@item.TotalPrice.ToString("C")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4>المدفوعات</h4>
+@if (Model.Payments.Any())
+{
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>تاريخ الدفع</th>
+                <th>المبلغ</th>
+                <th>طريقة الدفع</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var payment in Model.Payments)
+            {
+                <tr>
+                    <td>@payment.PaymentDate.ToString("yyyy-MM-dd")</td>
+                    <td>@payment.Amount.ToString("C")</td>
+                    <td>@payment.PaymentMethod</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>لا توجد مدفوعات حتى الآن.</p>
+}
+
+<h4>إضافة دفعة جديدة</h4>
+<form asp-action="AddPayment" method="post" class="row g-3 mb-4">
+    <input type="hidden" name="invoiceId" value="@Model.Id" />
+    <div class="col-md-4">
+        <label class="form-label">المبلغ</label>
+        <input type="number" name="amount" class="form-control" step="0.01" required />
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">طريقة الدفع</label>
+        <select name="method" class="form-control">
+            <option value="كاش">كاش</option>
+            <option value="تحويل">تحويل</option>
+            <option value="بطاقة">بطاقة</option>
+        </select>
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+        <button type="submit" class="btn btn-success">💰 إضافة دفعة</button>
+    </div>
+</form>
+
+<div class="text-center">
+    <a href="/Invoices" class="btn btn-secondary">رجوع للقائمة</a>
+</div>

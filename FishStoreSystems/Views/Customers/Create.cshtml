@@ -1,0 +1,46 @@
+﻿@model FishStoreSystem.BL.DTO.CustomerDTO
+
+@{
+    ViewData["Title"] = "إضافة عميل جديد";
+}
+
+<h2 class="text-center mb-4">👤 إضافة عميل جديد</h2>
+
+<form asp-action="Create" method="post" class="p-4 border rounded bg-light">
+
+    <div class="mb-3">
+        <label asp-for="Name" class="form-label fw-bold"></label>
+        <input asp-for="Name" class="form-control" placeholder="اسم العميل" required />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Phone" class="form-label fw-bold"></label>
+        <input asp-for="Phone" class="form-control" placeholder="رقم الهاتف" required />
+        <span asp-validation-for="Phone" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CreditLimit" class="form-label fw-bold"></label>
+        <input asp-for="CreditLimit" type="number" step="0.01" class="form-control" placeholder="حد الائتمان (اختياري)" />
+        <span asp-validation-for="CreditLimit" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Status" class="form-label fw-bold"></label>
+        <select asp-for="Status" class="form-control">
+            <option value="نشط">نشط</option>
+            <option value="غير نشط">غير نشط</option>
+        </select>
+        <span asp-validation-for="Status" class="text-danger"></span>
+    </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-success btn-lg">💾 حفظ</button>
+        <a href="/Customers" class="btn btn-secondary btn-lg">إلغاء</a>
+    </div>
+</form>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

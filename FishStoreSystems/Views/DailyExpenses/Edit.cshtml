@@ -1,0 +1,17 @@
+﻿@model FishStoreSystem_DAL.Entities.DailyExpense
+
+<h2>تعديل خروج يومي</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="Date" class="form-label">التاريخ</label>
+        <input asp-for="Date" type="date" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Amount" class="form-label">المبلغ</label>
+        <input asp-for="Amount" type="number" step="0.01" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success">حفظ</button>
+    <a href="/DailyExpenses/Index" class="btn btn-secondary">رجوع</a>
+</form>
