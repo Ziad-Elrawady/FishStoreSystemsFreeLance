@@ -5,6 +5,7 @@ using FishStoreSystem_DAL;
 using FishStoreSystem_DAL.Interface;
 using FishStoreSystem_DAL.Repositories;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,4 +43,8 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Customers}/{action=Index}/{id?}");
 
+var cultureInfo = new CultureInfo("ar-EG");
+
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 app.Run();

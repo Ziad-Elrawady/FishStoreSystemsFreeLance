@@ -210,13 +210,13 @@ namespace FishStoreSystem.Controllers
             return View("DailyPrint", model);
         }
 
-
         public async Task<IActionResult> WeeklyPrint(DateTime? start)
         {
             var startDate = start ?? DateTime.Today;
             var endDate = startDate.AddDays(6);
 
             var allInvoices = await _invoiceService.GetAllAsync();
+            var allExpenses = await _context.DailyExpenses.ToListAsync();
 
             var weekItems = new List<WeeklyItem>();
 
@@ -227,15 +227,18 @@ namespace FishStoreSystem.Controllers
                     .ToList();
 
                 var sales = invoicesOfDay.Sum(i => i.TotalAmount);
+
                 var paymentsReceived = invoicesOfDay
                     .SelectMany(i => i.Payments)
                     .Where(p => p.PaymentDate.Date == date.Date)
                     .Sum(p => p.Amount);
-                var receivables = invoicesOfDay
-                    .Where(i => i.PaidAmount < i.TotalAmount)
-                    .Sum(i => i.RemainingAmount);
 
-                decimal expenses = 0; // يمكن إدخالها من جدول الخوارج
+                var receivables = invoicesOfDay
+                    .Sum(i => i.TotalAmount - i.PaidAmount);
+
+                var expenses = allExpenses
+                    .Where(e => e.Date.Date == date.Date)
+                    .Sum(e => e.Amount);
 
                 weekItems.Add(new WeeklyItem
                 {
@@ -254,8 +257,9 @@ namespace FishStoreSystem.Controllers
                 Items = weekItems
             };
 
-            return View("WeeklyPrint", model); // استدعاء View منفصل للطباعة
+            return View("WeeklyPrint", model);
         }
+
 
     }
 }
