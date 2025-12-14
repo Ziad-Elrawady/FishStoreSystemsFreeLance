@@ -1,14 +1,14 @@
 ﻿/* =====================================================
-   ROOT THEME
+   ROOT COLORS (هادية ومحاسبية)
 ===================================================== */
 :root {
-    --primary: #0d6efd;
-    --secondary: #1fa97c;
-    --success: #198754;
-    --danger: #dc3545;
-    --warning: #ffc107;
-    --dark: #212529;
-    --light: #f4f7fb;
+    --primary: #2563eb; /* أزرق هادي */
+    --secondary: #059669; /* أخضر مريح */
+    --success: #16a34a;
+    --danger: #dc2626;
+    --warning: #f59e0b;
+    --dark: #111827;
+    --light: #f9fafb;
     --card: #ffffff;
     --radius: 14px;
 }
@@ -17,16 +17,45 @@
    GLOBAL
 ===================================================== */
 html {
-    font-size: 15px;
+    font-size: 17px; /* كبرنا الخط */
 }
 
 body {
     margin: 0;
     min-height: 100vh;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
-    color: #212529;
-    padding-top: 90px; /* Navbar ثابت */
+    background: linear-gradient(135deg, #f3f6fb, #eef2f7);
+    font-family: 'Cairo', 'Tajawal', sans-serif;
+    color: #111827;
+    padding-top: 90px;
+    font-weight: 600;
+}
+
+/* =====================================================
+   HEADINGS (واضحة جدًا)
+===================================================== */
+h1 {
+    font-size: 2.3rem;
+    font-weight: 800;
+}
+
+h2 {
+    font-size: 1.9rem;
+    font-weight: 800;
+}
+
+h3 {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+h4 {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+h5 {
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 /* =====================================================
@@ -37,84 +66,23 @@ body {
     top: 0;
     width: 100%;
     z-index: 999;
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    box-shadow: 0 6px 20px rgba(0,0,0,.15);
-    padding: 12px 0;
+    background: linear-gradient(135deg, var(--primary), #1e40af);
+    box-shadow: 0 8px 25px rgba(0,0,0,.2);
+    padding: 14px 0;
 }
 
-.navbar-brand {
-    color: #fff !important;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-}
-
-.logo-circle {
-    width: 42px;
-    height: 42px;
-    background: #fff;
-    color: var(--primary);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-}
-
-.brand-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.1;
-}
-
-.brand-name {
-    font-size: 16px;
-}
-
-.brand-sub {
-    font-size: 11px;
-    color: #e0f3ff;
-}
-
-.creative-navbar .nav-link {
-    color: #eaf6ff !important;
-    padding: 8px 18px;
-    border-radius: 20px;
-    font-weight: 500;
-    transition: .25s;
-    text-decoration: none;
-}
-
-    .creative-navbar .nav-link:hover {
-        background: rgba(255,255,255,.2);
-        color: #fff !important;
-    }
-
-    .creative-navbar .nav-link.active {
-        background: #fff;
-        color: var(--primary) !important;
+    .creative-navbar .nav-link {
+        color: #f9fafb !important;
+        padding: 10px 22px;
+        border-radius: 999px;
+        font-size: 1.05rem;
         font-weight: 700;
     }
 
-/* Dropdown */
-.dropdown-menu {
-    border-radius: var(--radius);
-    border: none;
-    padding: 8px;
-    box-shadow: 0 12px 30px rgba(0,0,0,.15);
-}
-
-.dropdown-item {
-    border-radius: 10px;
-    padding: 10px 14px;
-}
-
-    .dropdown-item:hover {
-        background: linear-gradient(135deg, var(--primary), var(--secondary));
-        color: #fff;
-    }
+        .creative-navbar .nav-link.active {
+            background: #fff;
+            color: var(--primary) !important;
+        }
 
 /* =====================================================
    PAGE HEADER
@@ -122,12 +90,9 @@ body {
 .page-header {
     background: var(--card);
     border-radius: var(--radius);
-    padding: 20px 24px;
-    margin-bottom: 24px;
-    box-shadow: 0 4px 15px rgba(0,0,0,.06);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 22px 26px;
+    margin-bottom: 28px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
 }
 
 /* =====================================================
@@ -137,14 +102,14 @@ body {
     background: var(--card);
     border-radius: var(--radius);
     border: none;
-    box-shadow: 0 6px 20px rgba(0,0,0,.08);
+    box-shadow: 0 12px 30px rgba(0,0,0,.1);
 }
 
 /* =====================================================
-   TABLES
+   TABLES (أوضح جزء)
 ===================================================== */
 .table {
-    margin-bottom: 0;
+    font-size: 1.05rem;
 }
 
     .table thead {
@@ -152,136 +117,99 @@ body {
         color: #fff;
     }
 
+    .table th {
+        font-size: 1.05rem;
+        font-weight: 800;
+        padding: 14px;
+    }
+
+    .table td {
+        font-size: 1.05rem;
+        font-weight: 600;
+        padding: 14px;
+    }
+
 .table-hover tbody tr:hover {
-    background-color: #f1f5ff;
+    background: #eef2ff;
 }
 
-.table td,
-.table th {
-    vertical-align: middle;
+/* =====================================================
+   MONEY / NUMBERS 💰
+===================================================== */
+.money,
+.amount {
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: .6px;
+}
+
+/* ألوان الديون */
+.text-danger {
+    color: var(--danger) !important;
+}
+
+.text-success {
+    color: var(--success) !important;
 }
 
 /* =====================================================
    BADGES
 ===================================================== */
 .badge {
-    padding: 6px 14px;
-    font-size: .8rem;
-    border-radius: 20px;
+    padding: 8px 18px;
+    font-size: .9rem;
+    font-weight: 700;
+    border-radius: 999px;
 }
 
 /* =====================================================
-   BUTTONS (Bootstrap override)
+   BUTTONS
 ===================================================== */
 .btn {
-    font-weight: 600;
-    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 8px 18px;
 }
 
 .btn-success {
-    background: linear-gradient(135deg, var(--secondary), #2ecc71);
+    background: linear-gradient(135deg, var(--secondary), #22c55e);
     border: none;
 }
 
 .btn-warning {
-    background: linear-gradient(135deg, #ffc107, #ff9800);
+    background: linear-gradient(135deg, #facc15, #f59e0b);
     border: none;
 }
 
 .btn-info {
-    background: linear-gradient(135deg, #0dcaf0, var(--primary));
+    background: linear-gradient(135deg, #38bdf8, #2563eb);
     border: none;
     color: #fff;
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary), #0b5ed7);
-    border: none;
-}
-
 /* =====================================================
-   FORMS
+   ACTION BUTTONS (الجدول)
 ===================================================== */
-.form-control,
-.form-select {
-    border-radius: 10px;
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 16px;
+    font-size: .95rem;
+    font-weight: 800;
+    border-radius: 999px;
+    text-decoration: none !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,.2);
 }
 
-    .form-control:focus,
-    .form-select:focus {
-        box-shadow: 0 0 0 .15rem rgba(13,110,253,.25);
-        border-color: var(--primary);
+    .btn-action:hover {
+        transform: translateY(-1px);
     }
 
 /* =====================================================
    UTILITIES
 ===================================================== */
 .text-muted {
-    color: #1e11dc !important;
-}
-
-/* =====================================================
-   ACTION BUTTONS (TABLE)
-===================================================== */
-.table-actions {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-}
-
-/* زر عام */
-.btn-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    padding: 5px 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all .2s ease;
-    text-decoration: none !important; /* 🔥 مهم */
-    box-shadow: 0 2px 6px rgba(0,0,0,.15);
-}
-
-    /* منع underline في كل الحالات */
-    .btn-action,
-    .btn-action:hover,
-    .btn-action:focus,
-    .btn-action:active,
-    .table a {
-        text-decoration: none !important;
-    }
-
-/* كشف حساب */
-.btn-view {
-    background: linear-gradient(135deg, #0dcaf0, #0d6efd);
-    color: #fff;
-}
-
-    .btn-view:hover {
-        opacity: .9;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,.25);
-    }
-
-/* تعديل */
-.btn-edit {
-    background: linear-gradient(135deg, #ffc107, #ff9800);
-    color: #212529;
-}
-
-    .btn-edit:hover {
-        opacity: .9;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0,0,0,.25);
-    }
-
-/* تعطيل */
-.btn-disabled {
-    opacity: .5;
-    pointer-events: none;
+    color: #6b7280 !important;
 }

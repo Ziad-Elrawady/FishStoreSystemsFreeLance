@@ -34,3 +34,54 @@
         </div>
     </div>
 </div>
+@if (Model.RemainingAmount > 0)
+{
+    <div class="card mb-4 border-danger">
+        <div class="card-header bg-danger text-white fw-bold">
+            💰 إضافة دفعة جديدة
+        </div>
+
+        <div class="card-body">
+            <form asp-action="AddPayment"
+                  asp-controller="Invoices"
+                  method="post"
+                  class="row g-3 align-items-end">
+
+                <input type="hidden" name="invoiceId" value="@Model.Id" />
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">المبلغ</label>
+                    <input type="number"
+                           name="amount"
+                           step="0.01"
+                           class="form-control"
+                           placeholder="أدخل المبلغ"
+                           required />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">طريقة الدفع</label>
+                    <select name="method" class="form-select">
+                        <option value="كاش">كاش</option>
+                        <option value="فيزا">فيزا</option>
+                        <option value="تحويل">تحويل بنكي</option>
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <button type="submit"
+                            class="btn btn-success w-100">
+                        ➕ إضافة دفعة
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-success text-center fw-bold">
+        ✅ هذه الفاتورة مدفوعة بالكامل
+    </div>
+}
+
