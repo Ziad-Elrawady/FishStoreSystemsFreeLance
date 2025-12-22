@@ -1,7 +1,7 @@
-﻿using FishStoreSystem.BL.DTO;
-using FishStoreSystem_DAL.Entities;
+﻿using FishStoreSystem_DAL.Entities;
 
-namespace FishStoreSystem.ViewModels
+
+namespace FishStoreSystems.ViewModels
 {
     public class WeeklyReportViewModel
     {
@@ -9,5 +9,11 @@ namespace FishStoreSystem.ViewModels
         public DateTime EndDate { get; set; }
 
         public List<WeeklyItem> Items { get; set; } = new();
+
+        public decimal TotalNetProfit => Items.Sum(i => i.NetProfit);
+        public decimal TotalPaymentsReceived => Items.Sum(i => i.PaymentsReceived);
+        public decimal TotalExpenses => Items.Sum(i => i.Expenses);
+        public decimal TotalReceivables => Items.Sum(i => i.Receivables);
     }
 }
+

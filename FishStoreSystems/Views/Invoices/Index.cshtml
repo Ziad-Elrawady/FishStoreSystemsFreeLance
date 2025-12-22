@@ -8,7 +8,7 @@
     <h3 class="fw-bold mb-0">📄 قائمة الفواتير</h3>
 
     <a href="/Invoices/Create" class="btn btn-success px-4">
-         فاتورة جديدة
+        فاتورة جديدة
     </a>
 </div>
 
@@ -19,65 +19,44 @@
                 <tr>
                     <th>#</th>
                     <th>اسم العميل</th>
-                    <th>تاريخ الإنشاء</th>
-                    <th>الاستحقاق</th>
+                    <th>التاريخ</th>
                     <th>الإجمالي</th>
                     <th>المدفوع</th>
                     <th>المتبقي</th>
                     <th>الحالة</th>
-                    <th style="width:180px">إجراءات</th>
+                    <th>إجراءات</th>
                 </tr>
             </thead>
             <tbody>
-                @if (!Model.Any())
+                @foreach (var inv in Model)
                 {
+                    var remaining = inv.TotalAmount - inv.PaidAmount;
+
                     <tr>
-                        <td colspan="9" class="py-4 text-muted">
-                            لا توجد فواتير
+                        <td>@inv.Id</td>
+                        <td>@inv.CustomerName</td>
+                        <td>@inv.InvoiceDate.ToString("yyyy-MM-dd")</td>
+                        <td>@inv.TotalAmount</td>
+                        <td>@inv.PaidAmount</td>
+                        <td>@remaining</td>
+                        <td>
+                            <span class="badge @(remaining > 0 ? "bg-danger" : "bg-success")">
+                                @(remaining > 0 ? "غير مدفوعة" : "مدفوعة")
+                            </span>
+                        </td>
+                        <td>
+                            <a class="btn btn-sm btn-primary"
+                               href="/Invoices/Details/@inv.Id">
+                                عرض / إضافة دفعة
+                            </a>
+
+                            <a class="btn btn-sm btn-secondary"
+                               href="/Invoices/Print/@inv.Id"
+                               target="_blank">
+                                طباعة
+                            </a>
                         </td>
                     </tr>
-                }
-                else
-                {
-                    foreach (var inv in Model)
-                    {
-                        var remaining = inv.TotalAmount - inv.PaidAmount;
-
-                        <tr>
-                            <td>@inv.Id</td>
-                            <td class="fw-semibold">@inv.CustomerName</td>
-                            <td>@inv.InvoiceDate.ToString("yyyy-MM-dd")</td>
-                            <td>@inv.DueDate.ToString("yyyy-MM-dd")</td>
-                            <td>@inv.TotalAmount</td>
-                            <td>@inv.PaidAmount</td>
-                            <td class="@(remaining > 0 ? "text-danger fw-bold" : "text-success fw-bold")">
-                                @remaining
-                            </td>
-                            <td>
-                                @if (remaining > 0)
-                                {
-                                    <span class="badge bg-danger">غير مدفوعة</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-success">مدفوعة</span>
-                                }
-                            </td>
-                            <td>
-                                <div class="table-actions">
-                                    <a href="/Invoices/Details/@inv.Id"
-                                       class="btn-action btn-view">
-                                        عرض
-                                    </a>
-                                    <a href="/Invoices/Print/@inv.Id"
-                                       target="_blank"
-                                       class="btn-action btn-edit">
-                                        طباعة
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    }
                 }
             </tbody>
         </table>

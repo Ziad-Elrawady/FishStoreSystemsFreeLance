@@ -12,7 +12,20 @@
 <div class="card">
     <div class="card-body">
 
-        <form asp-action="Create" method="post">
+        <!-- ===== VALIDATION ERRORS ===== -->
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@error.ErrorMessage</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <form asp-action="Create" method="post" onsubmit="return beforeSubmit();">
 
             <!-- ===== CUSTOMER & DUE DATE ===== -->
             <div class="row mb-4">
@@ -41,34 +54,32 @@
             <h5 class="fw-bold mb-3">الأصناف</h5>
 
             <div id="itemsContainer">
-                <div class="item-row row g-2 mb-2 align-items-center">
 
+                <!-- ITEM ROW -->
+                <div class="item-row row g-2 mb-2 align-items-center">
                     <div class="col-md-5">
-                        <input name="Items[0].ItemName"
-                               class="form-control"
+                        <input class="form-control item-name"
                                placeholder="اسم الصنف"
                                required />
                     </div>
 
                     <div class="col-md-2">
-                        <input name="Items[0].Quantity"
-                               class="form-control quantity"
-                               placeholder="كمية"
+                        <input class="form-control quantity"
                                type="number"
                                step="0.25"
                                min="0"
+                               placeholder="كمية"
                                required
                                oninput="updateTotal(this)" />
                     </div>
 
                     <div class="col-md-2">
                         <div class="input-group">
-                            <input name="Items[0].UnitPrice"
-                                   class="form-control unitPrice"
-                                   placeholder="السعر"
+                            <input class="form-control unit-price"
                                    type="number"
                                    step="0.25"
                                    min="0"
+                                   placeholder="السعر"
                                    required
                                    oninput="updateTotal(this)" />
                             <span class="input-group-text">EGP</span>
@@ -77,12 +88,8 @@
 
                     <div class="col-md-2">
                         <div class="input-group">
-                            <input name="Items[0].TotalPrice"
-                                   class="form-control totalPrice"
-                                   placeholder="الإجمالي"
-                                   type="number"
-                                   step="0.01"
-                                   readonly />
+                            <input class="form-control total-price" readonly />
+
                             <span class="input-group-text">EGP</span>
                         </div>
                     </div>
@@ -95,6 +102,7 @@
                         </button>
                     </div>
                 </div>
+
             </div>
 
             <button type="button"
@@ -109,11 +117,8 @@
             <div class="mb-4">
                 <label class="form-label fw-bold">إجمالي الفاتورة</label>
                 <div class="input-group">
-                    <input name="TotalAmount"
-                           id="InvoiceTotal"
+                    <input id="InvoiceTotal"
                            class="form-control fw-bold"
-                           type="number"
-                           step="0.01"
                            readonly />
                     <span class="input-group-text">EGP</span>
                 </div>
@@ -133,10 +138,8 @@
     </div>
 </div>
 
-<!-- ===== JS (زي ما هو بدون تغيير) ===== -->
+<!-- ===== JAVASCRIPT ===== -->
 <script>
-    let itemIndex = 1;
-
     function addItem() {
         const container = document.getElementById('itemsContainer');
         const row = document.createElement('div');
@@ -145,28 +148,25 @@
 
         row.innerHTML = `
             <div class="col-md-5">
-                <input name="Items[${itemIndex}].ItemName" class="form-control" placeholder="اسم الصنف" required />
+                <input class="form-control item-name" placeholder="اسم الصنف" required />
             </div>
 
             <div class="col-md-2">
-                <input name="Items[${itemIndex}].Quantity" class="form-control quantity"
-                       placeholder="كمية" type="number" step="0.25" min="0"
-                       required oninput="updateTotal(this)" />
+                <input class="form-control quantity" type="number" step="0.25" min="0"
+                       placeholder="كمية" required oninput="updateTotal(this)" />
             </div>
 
             <div class="col-md-2">
                 <div class="input-group">
-                    <input name="Items[${itemIndex}].UnitPrice" class="form-control unitPrice"
-                           placeholder="السعر" type="number" step="0.25" min="0"
-                           required oninput="updateTotal(this)" />
+                    <input class="form-control unit-price" type="number" step="0.25" min="0"
+                           placeholder="السعر" required oninput="updateTotal(this)" />
                     <span class="input-group-text">EGP</span>
                 </div>
             </div>
 
             <div class="col-md-2">
                 <div class="input-group">
-                    <input name="Items[${itemIndex}].TotalPrice" class="form-control totalPrice"
-                           placeholder="الإجمالي" type="number" step="0.01" readonly />
+                    <input class="form-control total-price" readonly />
                     <span class="input-group-text">EGP</span>
                 </div>
             </div>
@@ -177,7 +177,6 @@
         `;
 
         container.appendChild(row);
-        itemIndex++;
     }
 
     function removeItem(btn) {
@@ -188,17 +187,39 @@
     function updateTotal(input) {
         const row = input.closest('.item-row');
         const qty = parseFloat(row.querySelector('.quantity').value) || 0;
-        const price = parseFloat(row.querySelector('.unitPrice').value) || 0;
-        row.querySelector('.totalPrice').value = (qty * price).toFixed(2);
+        const price = parseFloat(row.querySelector('.unit-price').value) || 0;
+        row.querySelector('.total-price').value = (qty * price).toFixed(2);
         updateInvoiceTotal();
     }
 
     function updateInvoiceTotal() {
         let total = 0;
-        document.querySelectorAll('.totalPrice').forEach(tp => {
+        document.querySelectorAll('.total-price').forEach(tp => {
             total += parseFloat(tp.value) || 0;
         });
         document.getElementById('InvoiceTotal').value = total.toFixed(2);
+    }
+
+    function reindexItems() {
+        const rows = document.querySelectorAll('.item-row');
+        rows.forEach((row, index) => {
+            row.querySelector('.item-name').name  = `Items[${index}].ItemName`;
+            row.querySelector('.quantity').name   = `Items[${index}].Quantity`;
+            row.querySelector('.unit-price').name = `Items[${index}].UnitPrice`;
+            // ❌ متبعتش TotalPrice نهائي
+        });
+    }
+
+
+    function beforeSubmit() {
+        reindexItems();
+
+        const total = parseFloat(document.getElementById('InvoiceTotal').value) || 0;
+        if (total <= 0) {
+            alert('لا يمكن حفظ فاتورة بدون أصناف');
+            return false;
+        }
+        return true;
     }
 
     updateInvoiceTotal();

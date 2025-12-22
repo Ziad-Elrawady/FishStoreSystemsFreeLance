@@ -1,52 +1,73 @@
 ﻿@model IEnumerable<FishStoreSystems.ViewModels.WeeklyArchiveViewModel>
 @using System.Globalization
+
 @{
+    ViewData["Title"] = "أرشيف التقارير الأسبوعية";
     var egyptCulture = new CultureInfo("ar-EG");
 }
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4">أرشيف التقارير الأسبوعية</h2>
+    <h2 class="text-center mb-4">📊 أرشيف التقارير الأسبوعية</h2>
 
     @foreach (var report in Model)
     {
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h5>الأسبوع من @report.StartDate.ToString("yyyy-MM-dd") إلى @report.EndDate.ToString("yyyy-MM-dd")</h5>
+        <div class="card mb-5 shadow border-0">
+            <div class="card-header bg-primary text-white fw-bold text-center">
+                الأسبوع من
+                @report.StartDate.ToString("yyyy-MM-dd")
+                إلى
+                @report.EndDate.ToString("yyyy-MM-dd")
+
+                <a class="btn btn-sm btn-outline-light"
+                   target="_blank"
+                   href="/Reports/WeeklyPrint?start=@report.StartDate.ToString("yyyy-MM-dd")">
+                    🖨️ طباعة
+                </a>
+
             </div>
-            <div class="card-body p-0">
-                <table class="table table-bordered table-striped mb-0 text-center">
-                    <thead class="table-secondary">
+
+            <table class="table table-bordered table-hover text-center align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>التاريخ</th>
+                        <th>إجمالي المبيعات (صافي)</th>
+                        <th>المدفوعات</th>
+                        <th>الخوارج</th>
+                        <th>المبالغ على الزبائن</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var day in report.Days)
+                    {
                         <tr>
-                            <th>التاريخ</th>
-                            <th>إجمالي المبيعات</th>
-                            <th>المدفوعات المستلمة</th>
-                            <th>الخوارج</th>
-                            <th>المبالغ على الزبائن</th>
+                            <td>@day.Date.ToString("yyyy-MM-dd")</td>
+
+                            <td class="fw-bold text-success">
+                                @day.NetProfit.ToString("C", egyptCulture)
+                            </td>
+
+                            <td>@day.PaymentsReceived.ToString("C", egyptCulture)</td>
+                            <td class="fw-bold text-danger">
+                                @day.Expenses.ToString("C", egyptCulture)
+                            </td>
+                            <td>@day.Receivables.ToString("C", egyptCulture)</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var day in report.Days)
-                        {
-                            <tr>
-                                <td>@day.Date.ToString("yyyy-MM-dd")</td>
-                                <td>@day.Sales.ToString("C", egyptCulture)</td>
-                                <td>@day.PaymentsReceived.ToString("C", egyptCulture)</td>
-                                <td>@day.Expenses.ToString("C", egyptCulture)</td>
-                                <td>@day.Receivables.ToString("C", egyptCulture)</td>
-                            </tr>
-                        }
-                    </tbody>
-                    <tfoot class="table-dark">
-                        <tr>
-                            <th>مجموع الأسبوع</th>
-                            <th>@report.TotalSales.ToString("C", egyptCulture)</th>
-                            <th>@report.TotalPaymentsReceived.ToString("C", egyptCulture)</th>
-                            <th>@report.TotalExpenses.ToString("C", egyptCulture)</th>
-                            <th>@report.TotalReceivables.ToString("C", egyptCulture)</th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+                    }
+                </tbody>
+
+                <tfoot class="table-secondary fw-bold">
+                    <tr>
+                        <th>مجموع الأسبوع</th>
+                        <th class="text-success">
+                            @report.TotalNetProfit.ToString("C", egyptCulture)
+                        </th>
+                        <th>@report.TotalPaymentsReceived.ToString("C", egyptCulture)</th>
+                        <th class="text-danger">@report.TotalExpenses.ToString("C", egyptCulture)</th>
+                        <th>@report.TotalReceivables.ToString("C", egyptCulture)</th>
+                    </tr>
+                </tfoot>
+            </table>
         </div>
     }
 </div>

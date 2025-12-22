@@ -66,5 +66,23 @@ namespace FishStoreSystem_DAL.Repositories
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Payment> GetPaymentByIdAsync(int paymentId)
+        {
+            return await _context.Payments.FirstOrDefaultAsync(p => p.Id == paymentId);
+        }
+
+        public async Task DeletePaymentAsync(Payment payment)
+        {
+            _context.Payments.Remove(payment);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteInvoiceAsync(Invoice invoice)
+        {
+            _context.Invoices.Remove(invoice);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

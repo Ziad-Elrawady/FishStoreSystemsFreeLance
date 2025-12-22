@@ -38,13 +38,31 @@ else
 
             <!-- ===== INVOICE HEADER ===== -->
             <div class="card-header bg-warning fw-bold d-flex justify-content-between align-items-center">
+
                 <span>
                     فاتورة #@inv.Id
+                    <span class="text-muted ms-2">
+                        @inv.InvoiceDate.ToShortDateString()
+                    </span>
                 </span>
-                <span class="text-muted">
-                    @inv.InvoiceDate.ToShortDateString()
-                </span>
+
+                <!-- 🗑 حذف الفاتورة -->
+                <form asp-action="DeleteInvoice"
+                      asp-controller="Invoices"
+                      method="post"
+                      onsubmit="return confirm('سيتم حذف الفاتورة وكل الدفعات المرتبطة بها، هل أنت متأكد؟');">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" name="id" value="@inv.Id" />
+
+                    <button class="btn btn-sm btn-danger">
+                        🗑 حذف الفاتورة
+                    </button>
+                </form>
+
             </div>
+
 
             <!-- ===== CARD BODY ===== -->
             <div class="card-body">
@@ -132,15 +150,37 @@ else
                         @foreach (var p in inv.Payments)
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center">
+
                                 <span>
                                     @p.PaymentDate.ToShortDateString()
                                     <span class="text-muted">(@p.PaymentMethod)</span>
                                 </span>
-                                <strong class="text-success">
-                                    @p.Amount.ToString("C", egyptCulture)
-                                </strong>
+
+                                <div class="d-flex align-items-center gap-2">
+                                    <strong class="text-success">
+                                        @p.Amount.ToString("C", egyptCulture)
+                                    </strong>
+
+                                    <!-- 🗑 حذف الدفعة -->
+                                    <form asp-action="DeletePayment"
+                                          asp-controller="Payments"
+                                          method="post"
+                                          onsubmit="return confirm('هل أنت متأكد من حذف هذه الدفعة؟');">
+
+                                        @Html.AntiForgeryToken()
+
+                                        <input type="hidden" name="paymentId" value="@p.Id" />
+                                        <input type="hidden" name="invoiceId" value="@inv.Id" />
+
+                                        <button class="btn btn-sm btn-outline-danger">
+                                            🗑
+                                        </button>
+                                    </form>
+                                </div>
+
                             </li>
                         }
+
                     </ul>
                 }
 

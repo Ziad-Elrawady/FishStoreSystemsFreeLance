@@ -1,41 +1,82 @@
-﻿@model FishStoreSystem.ViewModels.WeeklyReportViewModel
+﻿@model FishStoreSystems.ViewModels.WeeklyReportViewModel
 @using System.Globalization
+
 @{
     var egyptCulture = new CultureInfo("ar-EG");
 }
 
 <div class="container mt-4">
-    <h2 class="text-center mb-4">التقرير الأسبوعي من @Model.StartDate.ToString("yyyy-MM-dd") إلى @Model.EndDate.ToString("yyyy-MM-dd")</h2>
+    <h2 class="text-center mb-4">
+        التقرير الأسبوعي من
+        @Model.StartDate.ToString("yyyy-MM-dd")
+        إلى
+        @Model.EndDate.ToString("yyyy-MM-dd")
+    </h2>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold">
+            التقرير الأسبوعي
+            من @Model.StartDate.ToString("yyyy-MM-dd")
+            إلى @Model.EndDate.ToString("yyyy-MM-dd")
+        </h5>
+        <a class="btn btn-warning"
+           target="_blank"
+           href="/Reports/WeeklyPrint?start=@Model.StartDate.ToString("yyyy-MM-dd")">
+            🖨️ طباعة التقرير الأسبوعي
+        </a>
 
-    <table class="table table-bordered table-striped text-center">
+    </div>
+
+    <table class="table table-bordered table-striped text-center align-middle">
         <thead class="table-dark">
             <tr>
                 <th>التاريخ</th>
-                <th>إجمالي المبيعات</th>
-                <th>المدفوعات المستلمة</th>
+                <th>صافي الربح</th>
+                <th>المدفوعات</th>
                 <th>الخوارج</th>
-                <th>المبالغ على الزبائن</th>
+                <th>مبالغ على الزبائن</th>
             </tr>
         </thead>
+
         <tbody>
             @foreach (var item in Model.Items)
             {
                 <tr>
                     <td>@item.Date.ToString("yyyy-MM-dd")</td>
-                    <td>@item.Sales.ToString("C", egyptCulture)</td>
-                    <td>@item.PaymentsReceived.ToString("C", egyptCulture)</td>
-                    <td>@item.Expenses.ToString("C", egyptCulture)</td>
-                    <td>@item.Receivables.ToString("C", egyptCulture)</td>
+
+                    <td class="fw-bold text-success">
+                        @item.NetProfit.ToString("C", egyptCulture)
+                    </td>
+
+                    <td class="text-success">
+                        @item.PaymentsReceived.ToString("C", egyptCulture)
+                    </td>
+
+                    <td class="text-danger fw-bold">
+                        @item.Expenses.ToString("C", egyptCulture)
+                    </td>
+
+                    <td>
+                        @item.Receivables.ToString("C", egyptCulture)
+                    </td>
                 </tr>
             }
         </tbody>
-        <tfoot class="table-secondary">
+
+        <tfoot class="table-secondary fw-bold">
             <tr>
                 <th>المجموع</th>
-                <th>@Model.Items.Sum(i => i.Sales).ToString("C", egyptCulture)</th>
-                <th>@Model.Items.Sum(i => i.PaymentsReceived).ToString("C", egyptCulture)</th>
-                <th>@Model.Items.Sum(i => i.Expenses).ToString("C", egyptCulture)</th>
-                <th>@Model.Items.Sum(i => i.Receivables).ToString("C", egyptCulture)</th>
+                <th class="text-success">
+                    @Model.TotalNetProfit.ToString("C", egyptCulture)
+                </th>
+                <th>
+                    @Model.TotalPaymentsReceived.ToString("C", egyptCulture)
+                </th>
+                <th class="text-danger">
+                    @Model.TotalExpenses.ToString("C", egyptCulture)
+                </th>
+                <th>
+                    @Model.TotalReceivables.ToString("C", egyptCulture)
+                </th>
             </tr>
         </tfoot>
     </table>

@@ -8,5 +8,9 @@ namespace FishStoreSystem_BL.Interface
         Task<InvoiceDTO> GetByIdAsync(int id);
         Task<InvoiceDTO> CreateAsync(InvoiceDTO dto);
         Task AddPaymentAsync(int invoiceId, decimal amount, string method);
+        Task DeletePaymentAsync(int paymentId);
+        Task DeleteInvoiceAsync(int invoiceId);
+
+
     }
 }

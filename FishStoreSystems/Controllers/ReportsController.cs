@@ -1,4 +1,5 @@
-﻿using FishStoreSystem.ViewModels;
+﻿using FishStoreSystem.BL.DTO;
+using FishStoreSystem.ViewModels;
 using FishStoreSystem_BL.Interface;
 using FishStoreSystem_DAL;
 using FishStoreSystem_DAL.Entities;
@@ -12,12 +13,17 @@ namespace FishStoreSystem.Controllers
     {
         private readonly IInvoiceService _invoiceService;
         private readonly ICustomerService _customerService;
+        private readonly IPaymentService _paymentService;
         private readonly AppDbContext _context;
-
-        public ReportsController(IInvoiceService invoiceService, ICustomerService customerService, AppDbContext context)
+        public ReportsController(
+            IInvoiceService invoiceService,
+            ICustomerService customerService,
+            IPaymentService paymentService,
+            AppDbContext context)
         {
             _invoiceService = invoiceService;
             _customerService = customerService;
+            _paymentService = paymentService;
             _context = context;
         }
 
@@ -26,26 +32,24 @@ namespace FishStoreSystem.Controllers
         {
             var targetDate = date ?? DateTime.Today;
 
-            var allInvoices = await _invoiceService.GetAllAsync();
-
             // فواتير اليوم
-            var invoicesOfDay = allInvoices
+            var invoicesOfDay = await _context.Invoices
+                .Include(i => i.Payments)
+                .Include(i => i.Customer)
                 .Where(i => i.InvoiceDate.Date == targetDate.Date)
-                .ToList();
+                .ToListAsync();
 
-            // المدفوعات حسب تاريخ الدفع (سواء الفاتورة كانت في يوم تاني)
-            var paymentsReceived = allInvoices
-                .SelectMany(i => i.Payments)
+            // 🔥 المدفوعات المستلمة (من جدول Payments مباشرة)
+            var paymentsReceived = await _context.Payments
                 .Where(p => p.PaymentDate.Date == targetDate.Date)
-                .Sum(p => p.Amount);
+                .SumAsync(p => p.Amount);
 
-            // المبالغ المتبقية من فواتير اليوم فقط
+            // المبالغ المتبقية من فواتير اليوم
             var receivables = invoicesOfDay
-                .Where(i => i.PaidAmount < i.TotalAmount)
-                .Sum(i => i.TotalAmount - i.PaidAmount);
+                .Sum(i => i.TotalAmount - i.Payments.Sum(p => p.Amount));
 
-            // مبيعات صاحب المحل (يدخلها هو يدوي)
-            var DailySales = await _context.DailySales
+            // مبيعات صاحب المحل (يدخلها يدوي)
+            var dailySales = await _context.DailySales
                 .Where(o => o.Date.Date == targetDate.Date)
                 .SumAsync(o => o.Amount);
 
@@ -57,208 +61,260 @@ namespace FishStoreSystem.Controllers
             var model = new DailyReportViewModel
             {
                 Date = targetDate,
-                InvoicesOfDay = invoicesOfDay,
+
+                // 👇 نفس اللي في الـ UI
                 PaymentsReceived = paymentsReceived,
                 Receivables = receivables,
-                TotalManualSales = DailySales,
-                Expenses = expenses
+                TotalManualSales = dailySales,
+                Expenses = expenses,
+
+                // عرض فواتير اليوم
+                InvoicesOfDay = invoicesOfDay.Select(i =>
+                {
+                    var paid = i.Payments.Sum(p => p.Amount);
+
+                    return new InvoiceDTO
+                    {
+                        Id = i.Id,
+                        CustomerName = i.Customer.Name,
+                        InvoiceDate = i.InvoiceDate,
+                        TotalAmount = i.TotalAmount,
+                        PaidAmount = paid,
+                        RemainingAmount = i.TotalAmount - paid
+                    };
+                }).ToList()
             };
 
             return View(model);
         }
 
-        // ================= WEEKLY REPORT =================
+
         public async Task<IActionResult> Weekly(DateTime? start)
         {
-            var startDate = start ?? DateTime.Today ; // يبدأ من النهارده
+            var startDate = start ?? GetWeekStart(DateTime.Today);
             var endDate = startDate.AddDays(6);
 
-            var allInvoices = await _invoiceService.GetAllAsync();
+            var items = new List<WeeklyItem>();
 
-            var weekItems = new List<WeeklyItem>();
-
-            for (var date = startDate; date <= endDate; date = date.AddDays(1))
+            for (var day = startDate; day <= endDate; day = day.AddDays(1))
             {
-                var invoicesOfDay = allInvoices
-                    .Where(i => i.InvoiceDate.Date == date.Date)
-                    .ToList();
+                // فواتير اليوم
+                var dayInvoices = await _context.Invoices
+                    .Include(i => i.Payments)
+                    .Where(i => i.InvoiceDate.Date == day.Date)
+                    .ToListAsync();
 
-                var sales = await _context.DailySales
-                    .Where(o => o.Date.Date == date.Date)
-                    .SumAsync(o => o.Amount);
+                // التحصيل الفعلي لليوم
+                var paymentsReceived = await _context.Payments
+                    .Where(p => p.PaymentDate.Date == day.Date)
+                    .SumAsync(p => p.Amount);
 
-                var paymentsReceived = allInvoices
-                    .SelectMany(i => i.Payments)
-                    .Where(p => p.PaymentDate.Date == date.Date)
-                    .Sum(p => p.Amount);
+                // المبيعات اليدوية
+                var manualSales = await _context.DailySales
+                    .Where(s => s.Date.Date == day.Date)
+                    .SumAsync(s => s.Amount);
 
+                // الخوارج
                 var expenses = await _context.DailyExpenses
-                    .Where(e => e.Date.Date == date.Date)
+                    .Where(e => e.Date.Date == day.Date)
                     .SumAsync(e => e.Amount);
 
-                var receivables = invoicesOfDay
-                    .Where(i => i.PaidAmount < i.TotalAmount)
-                    .Sum(i => i.TotalAmount - i.PaidAmount);
+                // المتبقي على الزبائن (فواتير اليوم فقط)
+                var receivables = dayInvoices
+                    .Sum(i => i.TotalAmount - i.Payments.Sum(p => p.Amount));
 
-                weekItems.Add(new WeeklyItem
+                items.Add(new WeeklyItem
                 {
-                    Date = date,
-                    Sales = sales,
+                    Date = day,
+                    Sales = manualSales,
                     PaymentsReceived = paymentsReceived,
                     Expenses = expenses,
                     Receivables = receivables
+                    // NetProfit هيتحسب تلقائي
                 });
             }
 
-            // حفظ الأسبوع لو مش محفوظ
-            var exists = await _context.Weeklys
-                .AnyAsync(w => w.StartDate == startDate && w.EndDate == endDate);
-
-            if (!exists)
-            {
-                var weekly = new Weekly
-                {
-                    StartDate = startDate,
-                    EndDate = endDate,
-                    Items = weekItems
-                };
-
-                _context.Weeklys.Add(weekly);
-                await _context.SaveChangesAsync();
-            }
-
-            var model = new WeeklyReportViewModel
+            return View(new WeeklyReportViewModel
             {
                 StartDate = startDate,
                 EndDate = endDate,
-                Items = weekItems
-            };
-
-            return View(model);
+                Items = items
+            });
         }
 
-        // ================= WEEKLY ARCHIVE =================
+
+        // ================== HELPER ==================
+        private DateTime GetWeekStart(DateTime date)
+        {
+            int diff = (7 + (date.DayOfWeek - DayOfWeek.Saturday)) % 7;
+            return date.AddDays(-diff).Date;
+        }
         public async Task<IActionResult> WeeklyArchive()
         {
-            var weeklyEntities = await _context.Weeklys
-                .Include(w => w.Items)
-                .OrderByDescending(w => w.StartDate)
+            // 🔹 نجيب أول تاريخ فاتورة حقيقي
+            var invoiceDates = await _context.Invoices
+                .Select(i => i.InvoiceDate.Date)
+                .Distinct()
                 .ToListAsync();
 
-            var model = weeklyEntities.Select(w => new WeeklyArchiveViewModel
-            {
-                StartDate = w.StartDate,
-                EndDate = w.EndDate,
-                Days = w.Items.OrderBy(i => i.Date)
-                    .Select(i => new WeeklyDayViewModel
-                    {
-                        Date = i.Date,
-                        Sales = i.Sales,
-                        PaymentsReceived = i.PaymentsReceived,
-                        Expenses = i.Expenses,
-                        Receivables = i.Receivables
-                    }).ToList()
-            }).ToList();
+            if (!invoiceDates.Any())
+                return View(new List<WeeklyArchiveViewModel>());
 
-            return View(model);
+            var firstWeekStart = GetWeekStart(invoiceDates.Min());
+            var lastWeekStart = GetWeekStart(DateTime.Today);
+
+            var reports = new List<WeeklyArchiveViewModel>();
+
+            for (var weekStart = firstWeekStart;
+                 weekStart <= lastWeekStart;
+                 weekStart = weekStart.AddDays(7))
+            {
+                var days = new List<WeeklyDayViewModel>();
+
+                for (int i = 0; i < 7; i++)
+                {
+                    var day = weekStart.AddDays(i);
+
+                    var dayInvoices = await _context.Invoices
+                        .Include(i2 => i2.Payments)
+                        .Where(i2 => i2.InvoiceDate.Date == day.Date)
+                        .ToListAsync();
+
+                    var paymentsReceived = await _context.Payments
+                        .Where(p => p.PaymentDate.Date == day.Date)
+                        .SumAsync(p => p.Amount);
+
+                    var manualSales = await _context.DailySales
+                        .Where(s => s.Date.Date == day.Date)
+                        .SumAsync(s => s.Amount);
+
+                    var expenses = await _context.DailyExpenses
+                        .Where(e => e.Date.Date == day.Date)
+                        .SumAsync(e => e.Amount);
+
+                    var receivables = dayInvoices
+                        .Sum(inv => inv.TotalAmount - inv.Payments.Sum(p => p.Amount));
+
+                    days.Add(new WeeklyDayViewModel
+                    {
+                        Date = day,
+                        Sales = manualSales,
+                        PaymentsReceived = paymentsReceived,
+                        Expenses = expenses,
+                        Receivables = receivables
+                    });
+                }
+
+                reports.Add(new WeeklyArchiveViewModel
+                {
+                    StartDate = weekStart,
+                    EndDate = weekStart.AddDays(6),
+                    Days = days
+                });
+            }
+
+            // 🔥 دي مهمة عشان تشوف كل الأسابيع
+            return View(reports.OrderByDescending(r => r.StartDate).ToList());
         }
+
+
         public async Task<IActionResult> DailyPrint(DateTime? date)
         {
             var targetDate = date ?? DateTime.Today;
 
-            var allInvoices = await _invoiceService.GetAllAsync();
-            var overdueCustomers = await _customerService.GetOverdueCustomersAsync();
-
             // فواتير اليوم
-            var dailyInvoices = allInvoices
+            var dailyInvoices = await _invoiceService.GetAllAsync();
+            var invoicesOfDay = dailyInvoices
                 .Where(i => i.InvoiceDate.Date == targetDate.Date)
                 .ToList();
 
-            // المبالغ المتبقية على الزبائن
-            var receivables = dailyInvoices
-                .Where(i => i.PaidAmount < i.TotalAmount)
-                .Sum(i => i.TotalAmount - i.PaidAmount);
-
-            // المدفوعات المستلمة بتاريخ اليوم (زي Daily بالظبط)
-            var paymentsReceived = allInvoices
-                .SelectMany(i => i.Payments)
+            // ✅ المدفوعات (الحل النهائي)
+            var paymentsReceived = await _context.Payments
                 .Where(p => p.PaymentDate.Date == targetDate.Date)
-                .Sum(p => p.Amount);
+                .SumAsync(p => p.Amount);
 
-            // ✅ مبيعات صاحب المحل (المدخلة يدويًا)
+            // المبيعات اليدوية
             var totalManualSales = await _context.DailySales
-                .Where(o => o.Date.Date == targetDate.Date)
-                .SumAsync(o => o.Amount);
+                .Where(d => d.Date.Date == targetDate.Date)
+                .SumAsync(d => d.Amount);
 
-            // ✅ الخوارج اليومية
-            var totalExpenses = await _context.DailyExpenses
+            // الخوارج
+            var expenses = await _context.DailyExpenses
                 .Where(e => e.Date.Date == targetDate.Date)
                 .SumAsync(e => e.Amount);
+
+            // المبالغ على الزبائن
+            var receivables = invoicesOfDay
+                .Sum(i => i.TotalAmount - i.PaidAmount);
 
             var model = new DailyReportViewModel
             {
                 Date = targetDate,
-                InvoicesOfDay = dailyInvoices,
-                PaymentsReceived = paymentsReceived,
-                Receivables = receivables,
-                OverdueCustomers = overdueCustomers.ToList(),
-
                 TotalManualSales = totalManualSales,
-                Expenses = totalExpenses
+                PaymentsReceived = paymentsReceived,
+                Expenses = expenses,
+                Receivables = receivables,
+                InvoicesOfDay = invoicesOfDay
             };
 
             return View("DailyPrint", model);
         }
 
-        public async Task<IActionResult> WeeklyPrint(DateTime? start)
+
+
+
+        public async Task<IActionResult> WeeklyPrint(DateTime start)
         {
-            var startDate = start ?? DateTime.Today;
+            var startDate = GetWeekStart(start);
             var endDate = startDate.AddDays(6);
 
-            var allInvoices = await _invoiceService.GetAllAsync();
-            var allExpenses = await _context.DailyExpenses.ToListAsync();
+            var invoices = await _invoiceService.GetAllAsync();
+            var payments = await _paymentService.GetAllAsync();
 
-            var weekItems = new List<WeeklyItem>();
+            var items = new List<WeeklyItem>();
 
-            for (var date = startDate; date <= endDate; date = date.AddDays(1))
+            for (var day = startDate; day <= endDate; day = day.AddDays(1))
             {
-                var invoicesOfDay = allInvoices
-                    .Where(i => i.InvoiceDate.Date == date.Date)
+                var invoicesOfDay = invoices
+                    .Where(i => i.InvoiceDate.Date == day.Date)
                     .ToList();
 
-                var sales = invoicesOfDay.Sum(i => i.TotalAmount);
-
-                var paymentsReceived = invoicesOfDay
-                    .SelectMany(i => i.Payments)
-                    .Where(p => p.PaymentDate.Date == date.Date)
+                var paymentsReceived = payments
+                    .Where(p => p.PaymentDate.Date == day.Date)
                     .Sum(p => p.Amount);
+
+                var manualSales = await _context.DailySales
+                    .Where(d => d.Date.Date == day.Date)
+                    .SumAsync(d => d.Amount);
+
+                var expenses = await _context.DailyExpenses
+                    .Where(e => e.Date.Date == day.Date)
+                    .SumAsync(e => e.Amount);
 
                 var receivables = invoicesOfDay
                     .Sum(i => i.TotalAmount - i.PaidAmount);
 
-                var expenses = allExpenses
-                    .Where(e => e.Date.Date == date.Date)
-                    .Sum(e => e.Amount);
-
-                weekItems.Add(new WeeklyItem
+                items.Add(new WeeklyItem
                 {
-                    Date = date,
-                    Sales = sales,
+                    Date = day,
+                    Sales = manualSales,
                     PaymentsReceived = paymentsReceived,
-                    Receivables = receivables,
-                    Expenses = expenses
+                    Expenses = expenses,
+                    Receivables = receivables
+                    // NetProfit بيتحسب أوتوماتيك
                 });
             }
 
-            var model = new WeeklyReportViewModel
+
+            return View("WeeklyPrint", new WeeklyReportViewModel
             {
                 StartDate = startDate,
                 EndDate = endDate,
-                Items = weekItems
-            };
-
-            return View("WeeklyPrint", model);
+                Items = items
+            });
         }
+
+
 
 
     }

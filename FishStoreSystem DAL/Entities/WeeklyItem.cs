@@ -17,5 +17,8 @@ namespace FishStoreSystem_DAL.Entities
         public decimal Receivables { get; set; }
 
         public Weekly? WeeklyReport { get; set; }
+        public decimal NetProfit => Sales + PaymentsReceived - Expenses;
+
+
     }
 }

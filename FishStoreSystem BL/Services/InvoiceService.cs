@@ -3,6 +3,7 @@ using FishStoreSystem.BL.DTO;
 using FishStoreSystem.DAL.Entities;
 using FishStoreSystem_BL.Interface;
 using FishStoreSystem_DAL.Interface;
+using FishStoreSystem_DAL.Repositories;
 
 namespace FishStoreSystem_BL.Services
 {
@@ -20,37 +21,35 @@ namespace FishStoreSystem_BL.Services
         public async Task<IEnumerable<InvoiceDTO>> GetAllAsync()
         {
             var invoices = await _repository.GetAllAsync();
-            return invoices.Select(i => new InvoiceDTO
+
+            return invoices.Select(i =>
             {
-                Id = i.Id,
-                CustomerId = i.CustomerId,
-                CustomerName = i.Customer?.Name,
-                InvoiceDate = i.InvoiceDate,
-                DueDate = i.DueDate,
-                TotalAmount = i.TotalAmount,
-                PaidAmount = i.PaidAmount,
-                RemainingAmount = i.RemainingAmount,
-                Status = i.Status,
-                Items = i.Items.Select(item => new InvoiceItemDTO
+                var paid = i.Payments.Sum(p => p.Amount);
+                var remaining = i.TotalAmount - paid;
+
+                return new InvoiceDTO
                 {
-                    ItemName = item.ItemName,
-                    Quantity = item.Quantity,
-                    UnitPrice = item.UnitPrice,
-                    TotalPrice = item.TotalPrice
-                }).ToList(),
-                Payments = i.Payments.Select(p => new PaymentDTO
-                {
-                    PaymentDate = p.PaymentDate,
-                    Amount = p.Amount,
-                    PaymentMethod = p.PaymentMethod
-                }).ToList()
+                    Id = i.Id,
+                    CustomerId = i.CustomerId,
+                    CustomerName = i.Customer?.Name,
+                    InvoiceDate = i.InvoiceDate,
+                    DueDate = i.DueDate,
+                    TotalAmount = i.TotalAmount,
+                    PaidAmount = paid,
+                    RemainingAmount = remaining,
+                    Status = remaining <= 0 ? "مدفوعة" : "غير مدفوعة"
+                };
             });
         }
+
 
         public async Task<InvoiceDTO> GetByIdAsync(int id)
         {
             var invoice = await _repository.GetByIdAsync(id);
             if (invoice == null) return null;
+
+            var paid = invoice.Payments?.Sum(p => p.Amount) ?? 0;
+            var remaining = invoice.TotalAmount - paid;
 
             return new InvoiceDTO
             {
@@ -60,9 +59,12 @@ namespace FishStoreSystem_BL.Services
                 InvoiceDate = invoice.InvoiceDate,
                 DueDate = invoice.DueDate,
                 TotalAmount = invoice.TotalAmount,
-                PaidAmount = invoice.PaidAmount,
-                RemainingAmount = invoice.RemainingAmount,
-                Status = invoice.Status,
+
+                // 🔥 الحساب الصح
+                PaidAmount = paid,
+                RemainingAmount = remaining,
+                Status = remaining <= 0 ? "مدفوعة" : "غير مدفوعة",
+
                 Items = invoice.Items.Select(item => new InvoiceItemDTO
                 {
                     ItemName = item.ItemName,
@@ -70,6 +72,7 @@ namespace FishStoreSystem_BL.Services
                     UnitPrice = item.UnitPrice,
                     TotalPrice = item.TotalPrice
                 }).ToList(),
+
                 Payments = invoice.Payments.Select(p => new PaymentDTO
                 {
                     PaymentDate = p.PaymentDate,
@@ -78,6 +81,7 @@ namespace FishStoreSystem_BL.Services
                 }).ToList()
             };
         }
+
 
         public async Task<InvoiceDTO> CreateAsync(InvoiceDTO dto)
         {
@@ -105,7 +109,64 @@ namespace FishStoreSystem_BL.Services
 
         public async Task AddPaymentAsync(int invoiceId, decimal amount, string method)
         {
-            await _repository.AddPaymentAsync(invoiceId, amount, method);
+            var invoice = await _repository.GetByIdAsync(invoiceId);
+            if (invoice == null) return;
+
+            var remaining = invoice.TotalAmount - invoice.PaidAmount;
+
+            // لو الفاتورة مدفوعة بالكامل، نسمح بسجل دفع (تصحيح)
+            if (remaining <= 0)
+            {
+                invoice.Payments.Add(new Payment
+                {
+                    InvoiceId = invoice.Id,
+                    Amount = amount,
+                    PaymentMethod = method,
+                    PaymentDate = DateTime.Now
+                });
+
+                await _repository.UpdateAsync(invoice);
+                return;
+            }
+
+            if (amount > remaining)
+                amount = remaining;
+
+            // تسجيل الدفعة
+            invoice.Payments.Add(new Payment
+            {
+                InvoiceId = invoice.Id,
+                Amount = amount,
+                PaymentMethod = method,
+                PaymentDate = DateTime.Now
+            });
+
+            invoice.PaidAmount += amount;
+
+            invoice.Status = invoice.PaidAmount >= invoice.TotalAmount
+                ? "مدفوعة"
+                : "جزئي";
+
+            await _repository.UpdateAsync(invoice);
         }
+
+        public async Task DeletePaymentAsync(int paymentId)
+        {
+            var payment = await _repository.GetPaymentByIdAsync(paymentId);
+            if (payment == null) return;
+
+            await _repository.DeletePaymentAsync(payment);
+        }
+
+        public async Task DeleteInvoiceAsync(int invoiceId)
+        {
+            var invoice = await _repository.GetByIdAsync(invoiceId);
+            if (invoice == null) return;
+
+            await _repository.DeleteInvoiceAsync(invoice);
+        }
+
+
+
     }
 }

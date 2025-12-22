@@ -7,5 +7,7 @@
         public decimal PaymentsReceived { get; set; }
         public decimal Expenses { get; set; }
         public decimal Receivables { get; set; }
+        public decimal NetProfit => Sales + PaymentsReceived - Expenses;
+
     }
 }
